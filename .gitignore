@@ -1,0 +1,56 @@
+# Ignore Godot editor and export artifacts
+.import/
+.godot/
+.mono/
+.mono_build/
+.mono_temp/
+.vs/
+.vscode/
+/.idea/
+
+# Godot editor filesystem cache and metadata
+/.godot/editor/
+.godot/editor/
+.godot/mono/temp/
+
+# Exported templates and builds
+/bin/
+/obj/
+/build/
+/*.exe
+/*.dll
+/*.pdb
+/*.mdb
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# macOS specific
+.AppleDouble
+.LSOverride
+
+# Visual Studio and Rider
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+packages/
+
+# dotnet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Godot mono temp files
+/.godot/mono/assemblies/
+.godot/mono/assemblies/
+
+# Logs
+*.log
+# Godot 4+ specific ignores
+.godot/
+/android/

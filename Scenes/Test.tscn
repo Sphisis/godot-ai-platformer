@@ -1,0 +1,171 @@
+[gd_scene load_steps=18 format=3 uid="uid://gihhodi8hcae"]
+
+[ext_resource type="Script" uid="uid://b3nitrabo1844" path="res://Scripts/CameraFollow.cs" id="1_3la1u"]
+[ext_resource type="Texture2D" uid="uid://bcj6cd27evihd" path="res://Assets/starrySky.png" id="2_c5xim"]
+[ext_resource type="Script" uid="uid://i20ubx44m4v1" path="res://Scripts/ParallaxScroller.cs" id="3_b07cf"]
+[ext_resource type="Script" uid="uid://vqeu6r7xuy1q" path="res://Scripts/InputController.cs" id="4_x8mav"]
+[ext_resource type="Script" uid="uid://bgveogsj0120g" path="res://Scripts/CharacterController.cs" id="5_07y4a"]
+[ext_resource type="PackedScene" uid="uid://bqkny0jri10tl" path="res://Prefabs/explosion.tscn" id="6_65pw5"]
+[ext_resource type="Texture2D" uid="uid://bhgbqbia3wm2x" path="res://Assets/suckerAlien_small_idle0001.png" id="7_vipjb"]
+[ext_resource type="Texture2D" uid="uid://damj1g4cije3o" path="res://Assets/suckerAlien_small_idle0002.png" id="8_mamcd"]
+[ext_resource type="Texture2D" uid="uid://b5q2d2peg3en4" path="res://Assets/suckerAlien_small_idle0000.png" id="9_tww1q"]
+[ext_resource type="Texture2D" uid="uid://drq4my0aoge8r" path="res://Assets/suckerAlien_small_idle0003.png" id="10_2qiau"]
+[ext_resource type="Texture2D" uid="uid://cupyv3fxk340n" path="res://Assets/dropShadow.png" id="11_50rxc"]
+[ext_resource type="Texture2D" uid="uid://dqx2dt8csh66s" path="res://Assets/goldCoin.png" id="12_8vvoa"]
+[ext_resource type="Texture2D" uid="uid://b4g7vb7y0wfhw" path="res://Assets/cheeseTop.png" id="13_y1m18"]
+[ext_resource type="Texture2D" uid="uid://cdwf3108dlgtq" path="res://Assets/cheeseGround.png" id="14_ts1ib"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_njov2"]
+size = Vector2(128, 127)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_c4vo5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_vipjb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_mamcd")
+}],
+"loop": true,
+"name": &"air",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_tww1q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_vipjb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_mamcd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2qiau")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_tww1q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_vipjb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_mamcd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2qiau")
+}],
+"loop": true,
+"name": &"run",
+"speed": 12.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2au82"]
+size = Vector2(1138, 20)
+
+[node name="Node2D" type="Node2D"]
+metadata/_edit_vertical_guides_ = [-5269.0]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("1_3la1u")
+TargetPath = NodePath("../CharacterBody2D")
+
+[node name="StarrySky" type="Sprite2D" parent="Camera2D"]
+z_index = -10
+texture_repeat = 2
+texture = ExtResource("2_c5xim")
+script = ExtResource("3_b07cf")
+ScrollScale = 0.1
+
+[node name="InputController" type="Node2D" parent="."]
+script = ExtResource("4_x8mav")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(0, -12)
+script = ExtResource("5_07y4a")
+MaxSpeed = 400.0
+Acceleration = 1000.0
+Friction = 1500.0
+JumpVelocity = -600.0
+InputControllerPath = NodePath("../InputController")
+ExplosionScene = ExtResource("6_65pw5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_njov2")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterBody2D"]
+position = Vector2(0, 6)
+sprite_frames = SubResource("SpriteFrames_c4vo5")
+animation = &"run"
+autoplay = "idle"
+frame_progress = 0.587424
+
+[node name="DropShadow" type="Sprite2D" parent="CharacterBody2D"]
+z_index = -1
+position = Vector2(0, 224)
+scale = Vector2(1.7760581, 2.2748163)
+texture = ExtResource("11_50rxc")
+
+[node name="GoldCoin" type="Sprite2D" parent="."]
+position = Vector2(-400, 115)
+texture = ExtResource("12_8vvoa")
+
+[node name="CheeseTop" type="Sprite2D" parent="."]
+z_index = -2
+position = Vector2(0, 150)
+scale = Vector2(9.520002, 1)
+texture = ExtResource("13_y1m18")
+
+[node name="Node2D" type="Node2D" parent="CheeseTop"]
+position = Vector2(0, 55)
+scale = Vector2(0.24789947, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="CheeseTop/Node2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheeseTop/Node2D/StaticBody2D"]
+position = Vector2(-4, 7.9999995)
+scale = Vector2(1.8081049, 0.8010204)
+shape = SubResource("RectangleShape2D_2au82")
+
+[node name="CheeseGround" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(43.0252, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
+
+[node name="CheeseGround2" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(128.84447, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
+
+[node name="CheeseGround3" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(214.76883, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
+
+[node name="CheeseGround4" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-214.74783, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
+
+[node name="CheeseGround5" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-128.92856, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
+
+[node name="CheeseGround6" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-43.004192, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ts1ib")
