@@ -61,11 +61,12 @@ public partial class CharacterController : CharacterBody2D
 			OnActionPressed();
 		}
 
-		// Get input direction from InputController
+		// Get input direction from InputController (now returns a Vector2)
 		float direction = 0;
 		if (_inputController != null)
 		{
-			direction = _inputController.GetMoveDirection();
+			var moveVec = _inputController.GetMoveVector();
+			direction = moveVec.X;
 		}
 
 		// Coyote time - allows jumping shortly after leaving platform
@@ -126,7 +127,7 @@ public partial class CharacterController : CharacterBody2D
 		}
 
 		// Horizontal movement with acceleration
-		if (direction != 0)
+		if (Mathf.Abs(direction) > 0.001f)
 		{
 			float accel = IsOnFloor() ? Acceleration : AirAcceleration;
 			velocity.X = Mathf.MoveToward(velocity.X, direction * MaxSpeed, accel * deltaF);

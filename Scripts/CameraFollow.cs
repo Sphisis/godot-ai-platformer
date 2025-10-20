@@ -14,9 +14,18 @@ public partial class CameraFollow : Camera2D
 
 	public override void _Ready()
 	{
-		if (TargetPath != null)
+		// Guard: TargetPath may be unset or empty in some scenes. Avoid calling GetNode with an empty path.
+		var pathStr = TargetPath?.ToString();
+		if (!string.IsNullOrEmpty(pathStr))
 		{
-			_target = GetNode<Node2D>(TargetPath);
+			if (HasNode(TargetPath))
+			{
+				_target = GetNode<Node2D>(TargetPath);
+			}
+			else
+			{
+				GD.PushWarning($"[CameraFollow] TargetPath '{TargetPath}' not found. Camera will not follow.");
+			}
 		}
 	}
 

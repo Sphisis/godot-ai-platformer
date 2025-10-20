@@ -1,0 +1,124 @@
+[gd_scene load_steps=13 format=3 uid="uid://djjwf0uq26bq5"]
+
+[ext_resource type="Script" uid="uid://b3nitrabo1844" path="res://Scripts/CameraFollow.cs" id="1_y7xpn"]
+[ext_resource type="Texture2D" uid="uid://bcj6cd27evihd" path="res://Assets/starrySky.png" id="2_o6ybn"]
+[ext_resource type="Script" uid="uid://i20ubx44m4v1" path="res://Scripts/ParallaxScroller.cs" id="3_4ypgp"]
+[ext_resource type="Script" uid="uid://vqeu6r7xuy1q" path="res://Scripts/InputController.cs" id="4_84bdo"]
+[ext_resource type="Texture2D" uid="uid://dqx2dt8csh66s" path="res://Assets/goldCoin.png" id="12_dtt0s"]
+[ext_resource type="Texture2D" uid="uid://b4g7vb7y0wfhw" path="res://Assets/cheeseTop.png" id="13_xprp7"]
+[ext_resource type="Texture2D" uid="uid://cdwf3108dlgtq" path="res://Assets/cheeseGround.png" id="14_ib44t"]
+[ext_resource type="PackedScene" uid="uid://cqwnsih5cqu7x" path="res://Scenes/pacman.tscn" id="15_o6ybn"]
+[ext_resource type="Shader" uid="uid://cd1dy72511fkt" path="res://Shaders/glitch.gdshader" id="15_ym643"]
+[ext_resource type="Script" uid="uid://vy55f3f52oef" path="res://Scripts/ViewportDisplay.cs" id="16_ym643"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2au82"]
+size = Vector2(1138, 20)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_47kkj"]
+shader = ExtResource("15_ym643")
+shader_parameter/glitch_strength = 0.5
+shader_parameter/noise_intensity = 0.2
+shader_parameter/slice_intensity = 10.0
+shader_parameter/slice_speed = 5.0
+shader_parameter/block_size = 15.0
+shader_parameter/block_distortion = 5.0
+shader_parameter/static_scale = 50.0
+shader_parameter/rgb_split = Vector2(15, -15)
+
+[node name="Node2D" type="Node2D"]
+metadata/_edit_vertical_guides_ = [-5269.0]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("1_y7xpn")
+TargetPath = NodePath("")
+
+[node name="StarrySky" type="Sprite2D" parent="Camera2D"]
+z_index = -10
+texture_repeat = 2
+texture = ExtResource("2_o6ybn")
+script = ExtResource("3_4ypgp")
+ScrollScale = 0.1
+
+[node name="InputController" type="Node2D" parent="."]
+visible = false
+script = ExtResource("4_84bdo")
+
+[node name="GoldCoin" type="Sprite2D" parent="."]
+position = Vector2(-400, 115)
+texture = ExtResource("12_dtt0s")
+
+[node name="CheeseTop" type="Sprite2D" parent="."]
+z_index = -2
+position = Vector2(0, 150)
+scale = Vector2(9.520002, 1)
+texture = ExtResource("13_xprp7")
+
+[node name="Node2D" type="Node2D" parent="CheeseTop"]
+position = Vector2(0, 55)
+scale = Vector2(0.24789947, 1)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="CheeseTop/Node2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CheeseTop/Node2D/StaticBody2D"]
+position = Vector2(-4, 7.9999995)
+scale = Vector2(1.8081049, 0.8010204)
+shape = SubResource("RectangleShape2D_2au82")
+
+[node name="CheeseGround" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(43.0252, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="CheeseGround2" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(128.84447, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="CheeseGround3" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(214.76883, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="CheeseGround4" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-214.74783, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="CheeseGround5" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-128.92856, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="CheeseGround6" type="Sprite2D" parent="CheeseTop"]
+z_index = -7
+position = Vector2(-43.004192, 468.60004)
+scale = Vector2(0.042016797, 0.4)
+texture = ExtResource("14_ib44t")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_47kkj")
+offset_left = -403.0
+offset_top = -439.0
+offset_right = -363.0
+offset_bottom = -399.0
+script = ExtResource("16_ym643")
+SubViewportPath = NodePath("../SubViewport")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(940, 880)
+render_target_update_mode = 4
+
+[node name="Node2D" parent="SubViewport" instance=ExtResource("15_o6ybn")]
+
+[node name="Node2D2" parent="SubViewport" instance=ExtResource("15_o6ybn")]
+visible = false
+position = Vector2(460, 420)

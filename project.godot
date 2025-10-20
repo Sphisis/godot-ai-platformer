@@ -24,6 +24,10 @@ window/size/viewport_height=1080
 
 project/assembly_name="GodotAiPlatformer"
 
+[global_group]
+
+Player=""
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

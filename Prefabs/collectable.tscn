@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://d4fabw4xatul"]
+
+[ext_resource type="Script" uid="uid://dh4dhl0vxgj2i" path="res://Scripts/Collectable.cs" id="1_3242r"]
+[ext_resource type="Texture2D" uid="uid://ce62h6fu445g0" path="res://Assets/packmanTiles.png" id="2_q85gk"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3soxf"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2tgl8"]
+atlas = ExtResource("2_q85gk")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_udlcn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2tgl8")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Collectable" type="Area2D"]
+collision_layer = 2
+script = ExtResource("1_3242r")
+RespawnTime = 6.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.31, 0.31)
+shape = SubResource("CircleShape2D_3soxf")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(1.0000001, 1.0000001)
+sprite_frames = SubResource("SpriteFrames_udlcn")
+autoplay = "default"

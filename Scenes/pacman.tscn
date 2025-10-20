@@ -1,0 +1,180 @@
+[gd_scene load_steps=22 format=4 uid="uid://cqwnsih5cqu7x"]
+
+[ext_resource type="Script" uid="uid://b3nitrabo1844" path="res://Scripts/CameraFollow.cs" id="1_3soxf"]
+[ext_resource type="Texture2D" uid="uid://bcj6cd27evihd" path="res://Assets/starrySky.png" id="2_dxt0h"]
+[ext_resource type="Script" uid="uid://i20ubx44m4v1" path="res://Scripts/ParallaxScroller.cs" id="3_4oy1w"]
+[ext_resource type="Script" uid="uid://vqeu6r7xuy1q" path="res://Scripts/InputController.cs" id="4_28hba"]
+[ext_resource type="TileSet" uid="uid://c0ttxtohxvstb" path="res://Assets/pacmanAtlas.tres" id="5_7rn85"]
+[ext_resource type="Texture2D" uid="uid://ce62h6fu445g0" path="res://Assets/packmanTiles.png" id="6_twqo8"]
+[ext_resource type="Script" uid="uid://cgxunj3tsabgq" path="res://Scripts/packmanController.cs" id="6_vu02e"]
+[ext_resource type="Script" uid="uid://cusa2f244voho" path="res://Scripts/GhostController.cs" id="8_2je0h"]
+[ext_resource type="Script" uid="uid://cost67swnmi0m" path="res://Scripts/MazeController.cs" id="8_udlcn"]
+[ext_resource type="PackedScene" uid="uid://d4fabw4xatul" path="res://Prefabs/collectable.tscn" id="9_3soxf"]
+[ext_resource type="Texture2D" uid="uid://bgu52eyha4hoo" path="res://Assets/bubble.png" id="9_d557i"]
+[ext_resource type="Script" uid="uid://bv3ad8qroo2ry" path="res://Scripts/TextController.cs" id="10_okvfx"]
+[ext_resource type="Script" uid="uid://cmjhh8a2fx0cr" path="res://Scripts/ThingCounter.cs" id="13_udlcn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vu02e"]
+atlas = ExtResource("6_twqo8")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2je0h"]
+atlas = ExtResource("6_twqo8")
+region = Rect2(0, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_d557i"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vu02e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2je0h")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vu02e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2je0h")
+}],
+"loop": true,
+"name": &"run",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_twqo8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_twqo8"]
+atlas = ExtResource("6_twqo8")
+region = Rect2(0, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d557i"]
+atlas = ExtResource("6_twqo8")
+region = Rect2(0, 64, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_okvfx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_twqo8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d557i")
+}],
+"loop": true,
+"name": &"default",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2je0h"]
+
+[node name="Node2D" type="Node2D"]
+metadata/_edit_vertical_guides_ = [-5269.0]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(5, 5)
+script = ExtResource("1_3soxf")
+TargetPath = NodePath("")
+
+[node name="background" type="Sprite2D" parent="Camera2D"]
+visible = false
+z_index = -10
+texture_repeat = 2
+texture = ExtResource("2_dxt0h")
+script = ExtResource("3_4oy1w")
+ScrollScale = 0.1
+
+[node name="InputController" type="Node2D" parent="."]
+script = ExtResource("4_28hba")
+
+[node name="Pacman" type="CharacterBody2D" parent="." groups=["Player"]]
+z_index = 1
+texture_filter = 1
+position = Vector2(56, 7.2000003)
+scale = Vector2(0.99999994, 0.99999994)
+collision_layer = 3
+motion_mode = 1
+script = ExtResource("6_vu02e")
+InputControllerPath = NodePath("../InputController")
+MaxSpeed = 40.0
+Acceleration = 160.0
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="Pacman"]
+scale = Vector2(1.0000001, 1.0000001)
+sprite_frames = SubResource("SpriteFrames_d557i")
+animation = &"run"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pacman"]
+scale = Vector2(0.66, 0.66)
+shape = SubResource("CircleShape2D_twqo8")
+
+[node name="Ghost" type="CharacterBody2D" parent="."]
+z_index = 1
+texture_filter = 1
+position = Vector2(-56.000004, 7.2000003)
+scale = Vector2(0.99999994, 0.99999994)
+motion_mode = 1
+script = ExtResource("8_2je0h")
+Speed = 24.0
+SpeedAdditionPerSecond = 0.8
+Acceleration = 80.0
+FlickerSpeed = 20.0
+FlickerChance = 0.8
+FlickerDuration = 0.9
+MinScale = 0.9
+MaxScale = 1.6
+JitterAmount = 0.16
+JumpChance = 0.3
+
+[node name="ghost" type="AnimatedSprite2D" parent="Ghost"]
+position = Vector2(0, -2.0000002)
+scale = Vector2(1.0000001, 1.0000001)
+sprite_frames = SubResource("SpriteFrames_okvfx")
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ghost"]
+scale = Vector2(0.74, 0.74)
+shape = SubResource("CircleShape2D_2je0h")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="Ghost"]
+path_postprocessing = 1
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+texture_filter = 1
+tile_map_data = PackedByteArray("AAACAP7/AgAFAAIAAAD9//7/AgADAAIAAAD9/wIAAgADAAQAAAACAAIAAgAFAAQAAAD+/wIAAgAEAAQAAAD//wIAAgAEAAQAAAAAAAIAAgAEAAQAAAABAAIAAgAEAAQAAAACAAEAAgAFAAMAAAACAAAAAgAFAAMAAAACAP//AgAFAAMAAAABAP7/AgAEAAIAAAAAAP7/AgAEAAIAAAD///7/AgAEAAIAAAD+//7/AgAEAAIAAAD9/wEAAgADAAMAAAD9/wAAAgADAAMAAAD9////AgADAAMAAAAEAPz/AgAHAAAAAAAEAP3/AgAHAAEAAAAEAP7/AgAHAAEAAAAEAP//AgAHAAEAAAAEAAAAAgAHAAEAAAAEAAEAAgAHAAEAAAAEAAIAAgAHAAEAAAD7//3/AgABAAEAAAD7//7/AgABAAEAAAD7////AgABAAEAAAD7/wAAAgABAAEAAAD7/wEAAgABAAEAAAD7/wIAAgABAAEAAAAEAAQAAgAHAAYAAAD7/wQAAgABAAYAAAD8/wQAAgADAAYAAAD9/wQAAgADAAYAAAD+/wQAAgADAAYAAAD//wQAAgADAAYAAAAAAAQAAgADAAYAAAABAAQAAgADAAYAAAACAAQAAgADAAYAAAADAAQAAgADAAYAAAAEAAMAAgAHAAMAAAD7/wMAAgABAAMAAAADAPz/AgAFAAAAAAACAPz/AgAFAAAAAAABAPz/AgAFAAAAAAAAAPz/AgAFAAAAAAD///z/AgAFAAAAAAD+//z/AgAFAAAAAAD9//z/AgAFAAAAAAD8//z/AgAFAAAAAAD7//z/AgABAAAAAAADAAEAAgAEAAMAAAADAAIAAgAEAAMAAAADAAMAAgAEAAMAAAACAAMAAgAEAAMAAAABAAMAAgAEAAMAAAAAAAMAAgAEAAMAAAD//wMAAgAEAAMAAAD+/wMAAgAEAAMAAAD9/wMAAgAEAAMAAAD8/wMAAgAEAAMAAAD8/wIAAgAEAAMAAAD8/wEAAgAEAAMAAAD8////AgAEAAMAAAD8//7/AgAEAAMAAAD8//3/AgAEAAMAAAD9//3/AgAEAAMAAAD+//3/AgAEAAMAAAD///3/AgAEAAMAAAAAAP3/AgAEAAMAAAABAP3/AgAEAAMAAAACAP3/AgAEAAMAAAADAP3/AgAEAAMAAAADAP7/AgAEAAMAAAADAP//AgAEAAMAAAADAAAAAgAEAAMAAAD8/wAAAgAEAAMAAAA=")
+tile_set = ExtResource("5_7rn85")
+script = ExtResource("8_udlcn")
+CollectibleScene = ExtResource("9_3soxf")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = -20
+position = Vector2(10, 0)
+scale = Vector2(0.829, 0.829)
+texture = ExtResource("9_d557i")
+
+[node name="Label" type="Label" parent="."]
+texture_filter = 1
+offset_left = -40.0
+offset_top = -20.0
+offset_right = 306.0
+offset_bottom = 199.0
+theme_override_font_sizes/font_size = 36
+text = "RUN"
+script = ExtResource("10_okvfx")
+LabelPath = NodePath(".")
+
+[node name="Label2" type="Label" parent="."]
+texture_filter = 1
+offset_left = -30.0
+offset_top = 30.0
+offset_right = 316.0
+offset_bottom = 249.0
+theme_override_font_sizes/font_size = 12
+text = "THINGS: 0"
+script = ExtResource("13_udlcn")
