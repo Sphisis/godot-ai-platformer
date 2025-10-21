@@ -20,19 +20,27 @@ public partial class GhostController : CharacterBody2D
 	private Vector2 _lastRequestedTarget = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
 	private bool targetVisible;
 	private Vector2 _startPosition;
+	private bool _isWaiting = false;
+	private float _waitTimer = 0f;
 
 	public override void _Ready()
 	{
 		// Store starting position
 		_startPosition = GlobalPosition;
-		
+
 		NavAgent.MaxSpeed = StartSpeed;
 		_target = ResolveTarget();
 
 		// Get GameManager singleton
 		_gameManager = GetNode<GameManager>("/root/GameManager");
-		GetNode<GameManager>("/root/GameManager").ResetLevel += OnResetLevel;
+		_gameManager.ResetLevel += OnResetLevel;
+		_gameManager.PlayerVictory += OnVictory;
 	}
+	
+	private void OnVictory()
+    {
+		isPaused = true;
+    }   
 
 	public void OnResetLevel()
 	{
@@ -50,6 +58,8 @@ public partial class GhostController : CharacterBody2D
 		isPaused = false;
 		_elapsedTime = 0f;
 		targetVisible = false;
+		_isWaiting = false;
+		_waitTimer = 0f;
 		
 		// Reset visibility
 		Visible = false;
@@ -78,6 +88,23 @@ public partial class GhostController : CharacterBody2D
 		if (_target == null) return;
 		float dt = (float)delta;
 
+		// Handle waiting state
+		if (_isWaiting)
+		{
+			_waitTimer -= dt;
+			if (_waitTimer <= 0f)
+			{
+				_isWaiting = false;
+			}
+			else
+			{
+				// Stay still while waiting
+				Velocity = Vector2.Zero;
+				MoveAndSlide();
+				return;
+			}
+		}
+
 		// move
 		UpdateWithAgent(dt);
 
@@ -93,6 +120,16 @@ public partial class GhostController : CharacterBody2D
 		{
 			targetVisible = sees;
 			Visible = targetVisible;
+			if (!targetVisible)
+			{
+				// 50% chance to wait 2-5 seconds when player goes out of sight
+				if (GD.Randf() < 0.5f)
+				{
+					_isWaiting = true;
+					_waitTimer = 2.0f + GD.Randf() * 3.0f;  // Random between 2-5 seconds
+					GD.Print($"[GhostController] Lost sight of player, waiting {_waitTimer:F1}s");
+				}
+			}
 		}
 	}
 

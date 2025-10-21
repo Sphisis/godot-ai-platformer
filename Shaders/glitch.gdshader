@@ -1,14 +1,23 @@
 shader_type canvas_item;
 
 // Glitch effect parameters
-uniform float glitch_strength : hint_range(0.0, 1.0) = 0.2;
-uniform float noise_intensity : hint_range(0.0, 1.0) = 0.15;
-uniform float slice_intensity : hint_range(0.0, 50.0) = 10.0;
+uniform float glitch_strength : hint_range(0.0, 1.0) = 0.05;
+uniform float noise_intensity : hint_range(0.0, 1.0) = 0.1;
+uniform float slice_intensity : hint_range(0.0, 50.0) = 1.5;
 uniform float slice_speed : hint_range(0.0, 10.0) = 5.0;
 uniform float block_size : hint_range(1.0, 50.0) = 15.0;
 uniform float block_distortion : hint_range(0.0, 50.0) = 2.0;
-uniform float static_scale : hint_range(1.0, 100.0) = 50.0;
-uniform vec2 rgb_split = vec2(3.0, -3.0);
+uniform float static_scale : hint_range(1.0, 100.0) = 40.0;
+uniform vec2 rgb_split = vec2(0.5, -0.5);
+
+// Scanline parameters
+uniform float scanline_intensity : hint_range(0.0, 1.0) = 0.3;
+uniform float scanline_count : hint_range(50.0, 500.0) = 200.0;
+uniform float scanline_speed : hint_range(0.0, 2.0) = 0.5;
+
+// CRT glow parameters
+uniform float glow_intensity : hint_range(0.0, 1.0) = 0.4;
+uniform float glow_spread : hint_range(0.0, 10.0) = 15.0;
 
 // Random function
 float random(vec2 uv) {
@@ -84,6 +93,31 @@ void fragment() {
                             vec3(sharp_noise), 
                             noise_intensity * 0.2);
         final_color.rgb += vec3(noise_burst) * 0.5;
+        
+        // Add scanlines
+        float scanline = sin((uv.y + TIME * scanline_speed) * scanline_count * 3.14159) * 0.5 + 0.5;
+        scanline = pow(scanline, 2.0);  // Make lines sharper
+        final_color.rgb *= 1.0 - (scanline * scanline_intensity);
+        
+        // CRT bloom/glow effect - sample surrounding pixels
+        vec2 pixel_size = TEXTURE_PIXEL_SIZE * glow_spread;
+        vec3 glow = vec3(0.0);
+        float glow_samples = 0.0;
+        
+        // Sample in a small cross pattern around the current pixel
+        for(float x = -1.0; x <= 1.0; x += 1.0) {
+            for(float y = -1.0; y <= 1.0; y += 1.0) {
+                if (x == 0.0 && y == 0.0) continue;
+                vec2 offset = vec2(x, y) * pixel_size;
+                vec4 sample_color = texture(TEXTURE, text_uv + displacement + offset);
+                glow += sample_color.rgb * sample_color.a;
+                glow_samples += 1.0;
+            }
+        }
+        
+        // Average and apply glow
+        glow /= glow_samples;
+        final_color.rgb += glow * glow_intensity;
         
         COLOR = final_color;
     } else {

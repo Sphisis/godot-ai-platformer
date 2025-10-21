@@ -11,6 +11,7 @@ public partial class packmanController : CharacterBody2D
 	private InputController _inputController;
 	private AnimatedSprite2D _sprite;
 	private bool isDead;
+	private bool isPaused;
 	private float _deadTime = 0f;
 	private float _jumpVelocity = -150f;
 	private float _gravity = 980f;
@@ -21,7 +22,7 @@ public partial class packmanController : CharacterBody2D
 	{
 		// Store starting position
 		_startPosition = GlobalPosition;
-		
+
 		_sprite = GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
 
 		if (InputControllerPath != null)
@@ -40,14 +41,19 @@ public partial class packmanController : CharacterBody2D
 		if (_gameManager != null)
 		{
 			_gameManager.PlayerDeath += OnPlayerDeath;
+			_gameManager.ResetLevel += OnResetLevel;
+			_gameManager.PlayerVictory += OnVictory;
 		}
 		else
 		{
 			GD.PushWarning("[packmanController] GameManager not found");
 		}
-
-		GetNode<GameManager>("/root/GameManager").ResetLevel += OnResetLevel;
 	}
+		
+	private void OnVictory()
+    {
+		isPaused = true;
+    }   
 
 	private void OnResetLevel()
 	{
@@ -82,6 +88,8 @@ public partial class packmanController : CharacterBody2D
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (isPaused) return;
+
 		if (isDead)
         {
 			UpdateDead(delta);

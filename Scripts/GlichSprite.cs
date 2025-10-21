@@ -16,6 +16,9 @@ public partial class GlichSprite : AnimatedSprite2D
 	[Export(PropertyHint.Range, "0,1,0.1")] 
 	public float FlickerDuration = 0.7f;  // How long each color stays (0-1)
 
+	[Export]
+	public Color baseColor = Colors.White;  // Color to flicker to
+	
 	[Export] 
 	public Color GlitchColor = new Color(1, 0, 0, 0.8f);  // Color to flicker to
 
@@ -40,7 +43,7 @@ public partial class GlichSprite : AnimatedSprite2D
 		// Glitchy color using noise and random
 		float noiseTime = _effectTime * FlickerSpeed;
 		bool changeColor = (GD.Randf() < FlickerChance) && (Mathf.PosMod(noiseTime, 1.0f) < FlickerDuration);
-		Modulate = changeColor ? GlitchColor : Colors.White;
+		Modulate = changeColor ? GlitchColor : baseColor;
 
 		// Erratic scale using stepped noise
 		float baseScale = MinScale;

@@ -24,6 +24,11 @@ shader_parameter/block_size = 15.0
 shader_parameter/block_distortion = 5.0
 shader_parameter/static_scale = 50.0
 shader_parameter/rgb_split = Vector2(15, -15)
+shader_parameter/scanline_intensity = 0.3
+shader_parameter/scanline_count = 200.0
+shader_parameter/scanline_speed = 0.5
+shader_parameter/glow_intensity = 0.4
+shader_parameter/glow_spread = 15.0
 
 [node name="Node2D" type="Node2D"]
 metadata/_edit_vertical_guides_ = [-5269.0]

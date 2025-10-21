@@ -11,6 +11,7 @@ public partial class Collectable : Area2D
 	
 	private Timer _respawnTimer;
 	private CollisionShape2D _collision;
+	private bool isPaused;
 
 	public override void _Ready()
 	{
@@ -30,16 +31,26 @@ public partial class Collectable : Area2D
 		// Connect the body entered signal
 		BodyEntered += OnBodyEntered;
 
-		GetNode<GameManager>("/root/GameManager").ResetLevel += OnResetLevel;
+		var _gameManager = GetNode<GameManager>("/root/GameManager");
+		_gameManager.ResetLevel += OnResetLevel;
+		_gameManager.PlayerVictory += OnVictory;
 	}
-	
+
 	private void OnResetLevel()
 	{
+		isPaused = false;
 		OnRespawnTimerTimeout();
 	}
+	
+	private void OnVictory()
+    {
+		isPaused = true;
+    }   
 
 	private void OnBodyEntered(Node2D body)
 	{
+		if (isPaused) return;
+
 		// Check if the entering body is the player
 		if (body.IsInGroup("Player"))
 		{

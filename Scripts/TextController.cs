@@ -25,6 +25,7 @@ public partial class TextController : Label
     private Label _label;
     private float _time;
     private bool _isGameOver = false;
+    private bool _isVictory = false;
     private GameManager _gameManager;
 
     public override void _Ready()
@@ -46,6 +47,7 @@ public partial class TextController : Label
         {
             _gameManager.PlayerDeath += OnGameOver;
             _gameManager.ResetLevel += OnReset;
+            _gameManager.PlayerVictory += OnVictory;
         }
         else
         {
@@ -58,7 +60,10 @@ public partial class TextController : Label
         _label.Text = "RUN AGAIN!";
         FitTextToWidth();
         _label.Modulate = new Color(AlarmColor, MinAlpha);
+        _label.Scale = Vector2.One;  // Reset scale
         _isGameOver = false;
+        _isVictory = false;
+        _time = 0f;
     }
 
     private void OnGameOver()
@@ -72,6 +77,18 @@ public partial class TextController : Label
         }
     }
 
+    private void OnVictory()
+    {
+        _isVictory = true;
+        _isGameOver = true;  // Stop normal blinking
+        _time = 0f;
+        if (_label != null)
+        {
+            _label.Text = "YOU WIN!";
+            FitTextToWidth();
+        }
+    }    
+    
     private void FitTextToWidth()
     {
         if (string.IsNullOrEmpty(Text))
@@ -97,11 +114,50 @@ public partial class TextController : Label
 
     public override void _Process(double delta)
     {
-        if (_label == null || _isGameOver) return;  // Stop blinking when game is over
-
+        if (_label == null) return;
+        
         // Update time
         _time += (float)delta;
         
+        // Victory color cycling (Commodore 64 style!)
+        if (_isVictory)
+        {
+            // Fast color cycling through classic C64 palette
+            float cycle = _time * 8.0f;  // Speed of color change
+            int colorIndex = Mathf.FloorToInt(cycle) % 16;
+            
+            // Classic Commodore 64 color palette
+            Color[] c64Colors = new Color[]
+            {
+                new Color(0.0f, 0.0f, 0.0f),       // Black
+                new Color(1.0f, 1.0f, 1.0f),       // White
+                new Color(0.53f, 0.0f, 0.0f),      // Red
+                new Color(0.0f, 0.93f, 0.93f),     // Cyan
+                new Color(0.6f, 0.0f, 0.6f),       // Purple
+                new Color(0.0f, 0.8f, 0.0f),       // Green
+                new Color(0.0f, 0.0f, 0.67f),      // Blue
+                new Color(0.93f, 0.93f, 0.47f),    // Yellow
+                new Color(0.6f, 0.4f, 0.0f),       // Orange
+                new Color(0.4f, 0.27f, 0.0f),      // Brown
+                new Color(0.8f, 0.47f, 0.47f),     // Light Red
+                new Color(0.33f, 0.33f, 0.33f),    // Dark Grey
+                new Color(0.47f, 0.47f, 0.47f),    // Grey
+                new Color(0.67f, 1.0f, 0.67f),     // Light Green
+                new Color(0.47f, 0.47f, 1.0f),     // Light Blue
+                new Color(0.73f, 0.73f, 0.73f)     // Light Grey
+            };
+            
+            _label.Modulate = c64Colors[colorIndex];
+            
+            // Pulsing scale effect
+            float pulse = Mathf.Sin(_time * 4.0f) * 0.3f + 1.0f;  // Oscillate between 0.7 and 1.3
+            _label.Scale = Vector2.One * 2.0f * pulse;  // Base 200% with pulse
+            
+            return;
+        }
+        
+        if (_isGameOver) return;  // Stop normal blinking when game is over
+
         // Calculate the phase of the blink (0 to 1)
         float phase = Mathf.PosMod(_time / BlinkSpeed, 1.0f);
         

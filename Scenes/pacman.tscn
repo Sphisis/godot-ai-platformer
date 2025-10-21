@@ -138,6 +138,8 @@ autoplay = "default"
 script = ExtResource("8_3soxf")
 FlickerSpeed = 16.0
 FlickerChance = 0.3
+baseColor = Color(0.89478207, 2.4546682e-06, 7.70092e-07, 1)
+GlitchColor = Color(17.002007, 17.002007, 17.002007, 1)
 MaxScale = 1.6
 JumpChance = 0.4
 
@@ -177,6 +179,7 @@ offset_right = 39.0
 offset_bottom = 25.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(39, 25)
 size_flags_vertical = 8
 theme_override_font_sizes/font_size = 36
 text = "RUN"

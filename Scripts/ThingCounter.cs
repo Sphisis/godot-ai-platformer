@@ -20,7 +20,8 @@ public partial class ThingCounter : Label
 		// Connect to all collectibles in the scene
 		CallDeferred(nameof(ConnectToCollectibles));
 
-		GetNode<GameManager>("/root/GameManager").ResetLevel += OnResetLevel;
+		var _gameManager = GetNode<GameManager>("/root/GameManager");
+		_gameManager.ResetLevel += OnResetLevel;
 	}
 
 	private void OnResetLevel()
@@ -48,6 +49,11 @@ public partial class ThingCounter : Label
 		_thingsCollected--;
 		UpdateLabel();
 		PlayPopAnimation();
+
+		if (_thingsCollected <= 0)
+		{
+			GetNode<GameManager>("/root/GameManager").TriggerPlayerVictory();
+		}
 	}
 	
 	private void PlayPopAnimation()
@@ -73,5 +79,14 @@ public partial class ThingCounter : Label
 	private void UpdateLabel()
 	{
 		Text = $"{_thingsCollected} LEFT!";
+	}
+
+	public override void _Process(double delta)
+	{
+		// Debug: trigger victory with V key
+		if (Input.IsActionJustPressed("ui_accept") || Input.IsKeyPressed(Key.V))
+		{
+			GetNode<GameManager>("/root/GameManager").TriggerPlayerVictory();
+		}
 	}
 }
