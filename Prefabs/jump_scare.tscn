@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://c7j37iv4gaak5"]
+
+[ext_resource type="Texture2D" uid="uid://ce62h6fu445g0" path="res://Assets/packmanTiles.png" id="1_2gyar"]
+[ext_resource type="Script" uid="uid://b32h8typ3f84j" path="res://Scripts/JumpscareGhost.cs" id="2_eac40"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dxt0h"]
+atlas = ExtResource("1_2gyar")
+region = Rect2(0, 64, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4oy1w"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dxt0h")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="JumpScare" type="AnimatedSprite2D"]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_4oy1w")
+autoplay = "default"
+script = ExtResource("2_eac40")
+ScaleSpeed = 60.0
+GlitchSpeed = 90.0

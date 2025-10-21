@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bcj6cd27evihd" path="res://Assets/starrySky.png" id="2_c5xim"]
 [ext_resource type="Script" uid="uid://i20ubx44m4v1" path="res://Scripts/ParallaxScroller.cs" id="3_b07cf"]
 [ext_resource type="Script" uid="uid://vqeu6r7xuy1q" path="res://Scripts/InputController.cs" id="4_x8mav"]
-[ext_resource type="Script" uid="uid://bgveogsj0120g" path="res://Scripts/CharacterController.cs" id="5_07y4a"]
+[ext_resource type="Script" uid="uid://bgveogsj0120g" path="res://Scripts/Agents/CharacterController.cs" id="5_07y4a"]
 [ext_resource type="PackedScene" uid="uid://bqkny0jri10tl" path="res://Prefabs/explosion.tscn" id="6_65pw5"]
 [ext_resource type="Texture2D" uid="uid://bhgbqbia3wm2x" path="res://Assets/suckerAlien_small_idle0001.png" id="7_vipjb"]
 [ext_resource type="Texture2D" uid="uid://damj1g4cije3o" path="res://Assets/suckerAlien_small_idle0002.png" id="8_mamcd"]

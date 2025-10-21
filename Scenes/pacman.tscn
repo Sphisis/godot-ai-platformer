@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=4 uid="uid://cqwnsih5cqu7x"]
+[gd_scene load_steps=24 format=4 uid="uid://cqwnsih5cqu7x"]
 
 [ext_resource type="Script" uid="uid://b3nitrabo1844" path="res://Scripts/CameraFollow.cs" id="1_3soxf"]
 [ext_resource type="Texture2D" uid="uid://bcj6cd27evihd" path="res://Assets/starrySky.png" id="2_dxt0h"]
@@ -6,8 +6,10 @@
 [ext_resource type="Script" uid="uid://vqeu6r7xuy1q" path="res://Scripts/InputController.cs" id="4_28hba"]
 [ext_resource type="TileSet" uid="uid://c0ttxtohxvstb" path="res://Assets/pacmanAtlas.tres" id="5_7rn85"]
 [ext_resource type="Texture2D" uid="uid://ce62h6fu445g0" path="res://Assets/packmanTiles.png" id="6_twqo8"]
-[ext_resource type="Script" uid="uid://cgxunj3tsabgq" path="res://Scripts/packmanController.cs" id="6_vu02e"]
+[ext_resource type="Script" uid="uid://cgxunj3tsabgq" path="res://Scripts/Agents/packmanController.cs" id="6_vu02e"]
 [ext_resource type="Script" uid="uid://cusa2f244voho" path="res://Scripts/GhostController.cs" id="8_2je0h"]
+[ext_resource type="Script" uid="uid://cb0cam10jyrvn" path="res://Scripts/GlichSprite.cs" id="8_3soxf"]
+[ext_resource type="PackedScene" uid="uid://c7j37iv4gaak5" path="res://Prefabs/jump_scare.tscn" id="8_dxt0h"]
 [ext_resource type="Script" uid="uid://cost67swnmi0m" path="res://Scripts/MazeController.cs" id="8_udlcn"]
 [ext_resource type="PackedScene" uid="uid://d4fabw4xatul" path="res://Prefabs/collectable.tscn" id="9_3soxf"]
 [ext_resource type="Texture2D" uid="uid://bgu52eyha4hoo" path="res://Assets/bubble.png" id="9_d557i"]
@@ -101,7 +103,7 @@ collision_layer = 3
 motion_mode = 1
 script = ExtResource("6_vu02e")
 InputControllerPath = NodePath("../InputController")
-MaxSpeed = 40.0
+MaxSpeed = 50.0
 Acceleration = 160.0
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="Pacman"]
@@ -114,35 +116,38 @@ autoplay = "idle"
 scale = Vector2(0.66, 0.66)
 shape = SubResource("CircleShape2D_twqo8")
 
-[node name="Ghost" type="CharacterBody2D" parent="."]
+[node name="Ghost" type="CharacterBody2D" parent="." node_paths=PackedStringArray("NavAgent", "_sprite")]
 z_index = 1
 texture_filter = 1
 position = Vector2(-56.000004, 7.2000003)
 scale = Vector2(0.99999994, 0.99999994)
 motion_mode = 1
 script = ExtResource("8_2je0h")
-Speed = 24.0
-SpeedAdditionPerSecond = 0.8
+MaxSpeed = 65.0
+TimeToMaxSpeed = 27.0
 Acceleration = 80.0
-FlickerSpeed = 20.0
-FlickerChance = 0.8
-FlickerDuration = 0.9
-MinScale = 0.9
-MaxScale = 1.6
-JitterAmount = 0.16
-JumpChance = 0.3
+NavAgent = NodePath("NavigationAgent2D")
+_sprite = NodePath("ghost")
+JumpscareScene = ExtResource("8_dxt0h")
 
 [node name="ghost" type="AnimatedSprite2D" parent="Ghost"]
 position = Vector2(0, -2.0000002)
 scale = Vector2(1.0000001, 1.0000001)
 sprite_frames = SubResource("SpriteFrames_okvfx")
 autoplay = "default"
+script = ExtResource("8_3soxf")
+FlickerSpeed = 16.0
+FlickerChance = 0.3
+MaxScale = 1.6
+JumpChance = 0.4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ghost"]
 scale = Vector2(0.74, 0.74)
 shape = SubResource("CircleShape2D_2je0h")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="Ghost"]
+path_desired_distance = 6.0
+target_desired_distance = 6.0
 path_postprocessing = 1
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
@@ -158,23 +163,46 @@ position = Vector2(10, 0)
 scale = Vector2(0.829, 0.829)
 texture = ExtResource("9_d557i")
 
-[node name="Label" type="Label" parent="."]
+[node name="alarmText" type="Label" parent="."]
 texture_filter = 1
-offset_left = -40.0
-offset_top = -20.0
-offset_right = 306.0
-offset_bottom = 199.0
+clip_contents = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -39.0
+offset_top = -25.0
+offset_right = 39.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 8
 theme_override_font_sizes/font_size = 36
 text = "RUN"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+uppercase = true
 script = ExtResource("10_okvfx")
 LabelPath = NodePath(".")
 
-[node name="Label2" type="Label" parent="."]
+[node name="thingsCounter" type="Label" parent="."]
 texture_filter = 1
-offset_left = -30.0
-offset_top = 30.0
-offset_right = 316.0
-offset_bottom = 249.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(40, 10)
 theme_override_font_sizes/font_size = 12
 text = "THINGS: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
 script = ExtResource("13_udlcn")

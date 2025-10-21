@@ -24,6 +24,8 @@ public partial class TextController : Label
 
     private Label _label;
     private float _time;
+    private bool _isGameOver = false;
+    private GameManager _gameManager;
 
     public override void _Ready()
     {
@@ -37,11 +39,65 @@ public partial class TextController : Label
 
         // Store the original color but use our alarm color
         _label.Modulate = new Color(AlarmColor, MinAlpha);
+
+        // Connect to GameManager
+        _gameManager = GetNode<GameManager>("/root/GameManager");
+        if (_gameManager != null)
+        {
+            _gameManager.PlayerDeath += OnGameOver;
+            _gameManager.ResetLevel += OnReset;
+        }
+        else
+        {
+            GD.PushWarning("[TextController] GameManager not found");
+        }
+    }
+
+    private void OnReset()
+    {
+        _label.Text = "RUN AGAIN!";
+        FitTextToWidth();
+        _label.Modulate = new Color(AlarmColor, MinAlpha);
+        _isGameOver = false;
+    }
+
+    private void OnGameOver()
+    {
+        _isGameOver = true;
+        if (_label != null)
+        {
+            _label.Text = "GAME OVER";
+            FitTextToWidth();
+            _label.Modulate = new Color(AlarmColor, MaxAlpha);  // Make fully visible
+        }
+    }
+
+    private void FitTextToWidth()
+    {
+        if (string.IsNullOrEmpty(Text))
+            return;
+
+        var font = GetThemeFont("font");
+        if (font == null)
+            return;
+
+        int fontSize = GetThemeFontSize("font_size");
+        float availableWidth = Size.X;
+        float textWidth = font.GetStringSize(Text, HorizontalAlignment.Left, -1, fontSize).X;
+
+        // Decrease font size until it fits (basic approach)
+        while (textWidth > availableWidth && fontSize > 5)
+        {
+            fontSize--;
+            textWidth = font.GetStringSize(Text, HorizontalAlignment.Left, -1, fontSize).X;
+        }
+
+        AddThemeFontSizeOverride("font_size", fontSize);
     }
 
     public override void _Process(double delta)
     {
-        if (_label == null) return;
+        if (_label == null || _isGameOver) return;  // Stop blinking when game is over
 
         // Update time
         _time += (float)delta;

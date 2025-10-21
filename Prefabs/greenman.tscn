@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://c6gdg76aujqok"]
 
-[ext_resource type="Script" uid="uid://bgveogsj0120g" path="res://Scripts/CharacterController.cs" id="1_eixoc"]
+[ext_resource type="Script" uid="uid://bgveogsj0120g" path="res://Scripts/Agents/CharacterController.cs" id="1_eixoc"]
 [ext_resource type="PackedScene" uid="uid://bqkny0jri10tl" path="res://Prefabs/explosion.tscn" id="2_elj36"]
 [ext_resource type="Texture2D" uid="uid://bhgbqbia3wm2x" path="res://Assets/suckerAlien_small_idle0001.png" id="3_qoun5"]
 [ext_resource type="Texture2D" uid="uid://damj1g4cije3o" path="res://Assets/suckerAlien_small_idle0002.png" id="4_1elr4"]

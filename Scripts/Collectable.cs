@@ -11,24 +11,31 @@ public partial class Collectable : Area2D
 	
 	private Timer _respawnTimer;
 	private CollisionShape2D _collision;
-	
+
 	public override void _Ready()
 	{
 		// Add to Collectable group for physics exclusion
 		AddToGroup("Collectable");
-		
+
 		// Set up respawn timer
 		_respawnTimer = new Timer();
 		_respawnTimer.OneShot = true;
 		_respawnTimer.WaitTime = RespawnTime;
 		_respawnTimer.Timeout += OnRespawnTimerTimeout;
 		AddChild(_respawnTimer);
-		
+
 		// Get collision shape
 		_collision = GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
-		
+
 		// Connect the body entered signal
 		BodyEntered += OnBodyEntered;
+
+		GetNode<GameManager>("/root/GameManager").ResetLevel += OnResetLevel;
+	}
+	
+	private void OnResetLevel()
+	{
+		OnRespawnTimerTimeout();
 	}
 
 	private void OnBodyEntered(Node2D body)
