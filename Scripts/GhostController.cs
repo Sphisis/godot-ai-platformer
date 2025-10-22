@@ -22,25 +22,49 @@ public partial class GhostController : CharacterBody2D
 	private Vector2 _startPosition;
 	private bool _isWaiting = false;
 	private float _waitTimer = 0f;
+	bool physicsInitialized;
+
 
 	public override void _Ready()
 	{
 		// Store starting position
 		_startPosition = GlobalPosition;
 
+		// set navAgent start speed
 		NavAgent.MaxSpeed = StartSpeed;
-		_target = ResolveTarget();
+
+		// set target to player
+		_target = GetTree().GetNodesInGroup("Player")[0] as CharacterBody2D;
 
 		// Get GameManager singleton
 		_gameManager = GetNode<GameManager>("/root/GameManager");
 		_gameManager.ResetLevel += OnResetLevel;
-		_gameManager.PlayerVictory += OnVictory;
+		_gameManager.PlayerVictory += () => isPaused = true;
+		_gameManager.Pause += (bool state) => isPaused = state;
+		_gameManager.PlayerDeath += () =>
+		{
+			isPaused = true;
+			SetVisibility(false);
+			SpawnJumpscare();
+		};
+
+		SetVisibility(false);
+		GD.Print($"{Name} visibility set to false in start");
+
+		CallDeferred(nameof(InitPhysics));
 	}
-	
-	private void OnVictory()
-    {
-		isPaused = true;
-    }   
+
+	private void InitPhysics()
+	{
+		physicsInitialized = true;
+	}
+
+	private void SetVisibility(bool state)
+	{
+		// set sprite to invisible
+		Visible = state;
+		_sprite.Visible = state;
+	}
 
 	public void OnResetLevel()
 	{
@@ -62,27 +86,12 @@ public partial class GhostController : CharacterBody2D
 		_waitTimer = 0f;
 		
 		// Reset visibility
-		Visible = false;
-		if (_sprite != null)
-		{
-			_sprite.Visible = true;
-		}
-		
-		GD.Print("[GhostController] Reset to start position");
-	}
-
-	private CharacterBody2D ResolveTarget()
-	{
-		var playerNodes = GetTree().GetNodesInGroup("Player");
-		if (playerNodes.Count > 0)
-		{
-			return playerNodes[0] as CharacterBody2D;
-		}
-		throw new Exception("Could not find player from the scene!");
+		SetVisibility(false);
 	}
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (!physicsInitialized) return;
 		if (isPaused) return;
 
 		if (_target == null) return;
@@ -116,10 +125,13 @@ public partial class GhostController : CharacterBody2D
 
 		// Line-of-sight visibility using the reusable utility (ignore Areas)
 		bool sees = PhysicsUtils.IsLineOfSightBetween(this, _target, LosTolerance, collideWithAreas: false);
+
 		if (sees != targetVisible)
 		{
 			targetVisible = sees;
-			Visible = targetVisible;
+			SetVisibility(targetVisible);
+			GD.Print($"{Name} visibility set to {targetVisible}");
+
 			if (!targetVisible)
 			{
 				// 50% chance to wait 2-5 seconds when player goes out of sight
@@ -127,7 +139,6 @@ public partial class GhostController : CharacterBody2D
 				{
 					_isWaiting = true;
 					_waitTimer = 2.0f + GD.Randf() * 3.0f;  // Random between 2-5 seconds
-					GD.Print($"[GhostController] Lost sight of player, waiting {_waitTimer:F1}s");
 				}
 			}
 		}
@@ -176,27 +187,8 @@ public partial class GhostController : CharacterBody2D
 		// Check if we're colliding with the target
 		for (int i = 0; i < GetSlideCollisionCount(); i++)
 		{
-			var collision = GetSlideCollision(i);
-			var collider = collision.GetCollider();
-			
-			if (collider == _target)
-			{
-				isPaused = true;
-				_sprite.Visible = false;
-				SpawnJumpscare();
-				
-				// Trigger death through GameManager
-				if (_gameManager != null)
-				{
-					_gameManager.TriggerPlayerDeath();
-				}
-				else
-				{
-					GD.PushWarning("[GhostController] GameManager not found");
-				}
-				
-				return;
-			}
+			if (GetSlideCollision(i).GetCollider() != _target) continue;
+			_gameManager.TriggerPlayerDeath();
 		}
 	}
 	

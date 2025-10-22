@@ -10,6 +10,7 @@ public partial class InputController : Node
 	[Signal] public delegate void JumpReleasedEventHandler();
 	[Signal] public delegate void ActionPressedEventHandler();
 	[Signal] public delegate void ActionReleasedEventHandler();
+	[Signal] public delegate void AnyKeyPressedEventHandler();
 
 	// Gamepad settings
 	[Export] public int GamepadDevice = 0;
@@ -19,11 +20,14 @@ public partial class InputController : Node
 	private Vector2 _previousMove = Vector2.Zero;
 	private bool _wasJumpPressed;
 	private bool _wasActionPressed;
+	private bool _hadAnyInput = false;
 
 	public override void _Process(double delta)
 	{
-	// Get horizontal and vertical input from keyboard or gamepad
-	float horizontal = 0;
+		bool hasAnyInput = false;
+		
+		// Get horizontal and vertical input from keyboard or gamepad
+		float horizontal = 0;
 		float vertical = 0;
 
 		// Keyboard input
@@ -83,6 +87,11 @@ public partial class InputController : Node
 				GD.Print($"[InputController] Movement: {moveVec.X:F2}, {moveVec.Y:F2} (Source: {source})");
 			}
 			_previousMove = moveVec;
+			
+			if (moveVec.Length() > 0.01f)
+			{
+				hasAnyInput = true;
+			}
 		}
 
 		// Jump input - keyboard (Space) or gamepad (A button)
@@ -97,6 +106,7 @@ public partial class InputController : Node
 		if (isJumpPressed && !_wasJumpPressed)
 		{
 			EmitSignal(SignalName.JumpPressed);
+			hasAnyInput = true;
 			if (EnableDebugLogging)
 			{
 				string source = Input.GetConnectedJoypads().Count > GamepadDevice && Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A) ? "Gamepad" : "Keyboard";
@@ -126,6 +136,7 @@ public partial class InputController : Node
 		if (isActionPressed && !_wasActionPressed)
 		{
 			EmitSignal(SignalName.ActionPressed);
+			hasAnyInput = true;
 			if (EnableDebugLogging)
 			{
 				string source = Input.GetConnectedJoypads().Count > GamepadDevice && Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B) ? "Gamepad" : "Keyboard";
@@ -142,6 +153,17 @@ public partial class InputController : Node
 		}
 
 		_wasActionPressed = isActionPressed;
+		
+		// Emit AnyKeyPressed signal on first input
+		if (hasAnyInput)
+		{
+			EmitSignal(SignalName.AnyKeyPressed);
+			_hadAnyInput = true;
+			if (EnableDebugLogging)
+			{
+				GD.Print("[InputController] Any key pressed - first input detected");
+			}
+		}
 	}
 
 	// Helper methods for direct polling (alternative to signals)

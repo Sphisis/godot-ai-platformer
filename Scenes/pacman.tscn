@@ -94,10 +94,34 @@ ScrollScale = 0.1
 [node name="InputController" type="Node2D" parent="."]
 script = ExtResource("4_28hba")
 
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+z_index = -5
+texture_filter = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -68.0
+offset_right = 90.0
+offset_bottom = 82.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(90, 75)
+texture = ExtResource("9_d557i")
+region_rect = Rect2(0, 0, 96, 96)
+patch_margin_left = 32
+patch_margin_top = 32
+patch_margin_right = 32
+patch_margin_bottom = 32
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
 [node name="Pacman" type="CharacterBody2D" parent="." groups=["Player"]]
 z_index = 1
 texture_filter = 1
-position = Vector2(56, 7.2000003)
+position = Vector2(56.000004, 8)
 scale = Vector2(0.99999994, 0.99999994)
 collision_layer = 3
 motion_mode = 1
@@ -119,7 +143,7 @@ shape = SubResource("CircleShape2D_twqo8")
 [node name="Ghost" type="CharacterBody2D" parent="." node_paths=PackedStringArray("NavAgent", "_sprite")]
 z_index = 1
 texture_filter = 1
-position = Vector2(-56.000004, 7.2000003)
+position = Vector2(-56, 8)
 scale = Vector2(0.99999994, 0.99999994)
 motion_mode = 1
 script = ExtResource("8_2je0h")
@@ -159,12 +183,6 @@ tile_set = ExtResource("5_7rn85")
 script = ExtResource("8_udlcn")
 CollectibleScene = ExtResource("9_3soxf")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-z_index = -20
-position = Vector2(10, 0)
-scale = Vector2(0.829, 0.829)
-texture = ExtResource("9_d557i")
-
 [node name="alarmText" type="Label" parent="."]
 texture_filter = 1
 clip_contents = true
@@ -173,10 +191,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -39.0
-offset_top = -25.0
-offset_right = 39.0
-offset_bottom = 25.0
+offset_left = -38.999996
+offset_top = -34.0
+offset_right = 39.000004
+offset_bottom = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(39, 25)
@@ -197,10 +215,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = 20.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -39.999996
+offset_top = 11.0
+offset_right = 40.000004
+offset_bottom = 31.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(40, 10)

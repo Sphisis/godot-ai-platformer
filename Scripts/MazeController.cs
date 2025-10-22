@@ -66,7 +66,5 @@ public partial class MazeController : TileMapLayer
 		
         // Add to scene tree
         AddChild(collectible);
-
-        GD.Print($"[MazeController] Spawned collectible at cell {cell}, position {collectible.GlobalPosition}");
     }
 }

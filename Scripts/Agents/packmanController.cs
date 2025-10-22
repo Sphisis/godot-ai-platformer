@@ -38,53 +38,67 @@ public partial class packmanController : CharacterBody2D
 
 		// Connect to GameManager
 		_gameManager = GetNode<GameManager>("/root/GameManager");
-		if (_gameManager != null)
-		{
-			_gameManager.PlayerDeath += OnPlayerDeath;
-			_gameManager.ResetLevel += OnResetLevel;
-			_gameManager.PlayerVictory += OnVictory;
-		}
-		else
-		{
-			GD.PushWarning("[packmanController] GameManager not found");
-		}
+		_gameManager.PlayerDeath += OnPlayerDeath;
+		_gameManager.ResetLevel += OnResetLevel;
+		_gameManager.PlayerVictory += () => isPaused = true;
+		_gameManager.Pause += (bool state) => isPaused = state;
+
+		CallDeferred(nameof(Start));
 	}
-		
-	private void OnVictory()
-    {
-		isPaused = true;
-    }   
+
+	private void Start()
+	{
+		// pause game immediately after start
+		_gameManager.SetPause(true);
+
+		// wait for few seconds and then give player the chance to start the game with any key
+		var timer = new Timer();
+		timer.WaitTime = 2.0f;
+		timer.OneShot = true;
+		AddChild(timer);
+		timer.Timeout += () =>
+		{
+			timer.QueueFree();
+			_inputController.AnyKeyPressed += StartGame;
+		};
+		timer.Start();
+	}
+
+	private void StartGame()
+	{
+		GD.Print("Any key pressed!");
+		_inputController.AnyKeyPressed -= StartGame;
+		_gameManager.SetPause(false);
+	}
 
 	private void OnResetLevel()
 	{
 		// Reset position
 		GlobalPosition = _startPosition;
 		Velocity = Vector2.Zero;
-		
+
 		// Reset state
 		isDead = false;
 		_deadTime = 0f;
-		
+
 		// Re-enable collision
 		SetCollisionLayerValue(1, true);
 		SetCollisionMaskValue(1, true);
-		
+
 		// Reset animation
 		if (_sprite != null)
 		{
 			_sprite.Play("idle");
 		}
-		
-		GD.Print("[packmanController] Reset complete");
 	}
-
+	
 	private void OnPlayerDeath()
-    {
+	{
 		isDead = true;
 		// Disable collision
 		SetCollisionLayerValue(1, false);
 		SetCollisionMaskValue(1, false);
-    }
+	}
 
 	public override void _PhysicsProcess(double delta)
 	{
@@ -104,10 +118,7 @@ public partial class packmanController : CharacterBody2D
 		float dt = (float)delta;
 
 		Vector2 move = Vector2.Zero;
-		if (_inputController != null)
-		{
-			move = _inputController.GetMoveVector();
-		}
+		move = _inputController.GetMoveVector();
 
 		// Smooth acceleration toward desired velocity
 		Vector2 target = move * MaxSpeed;

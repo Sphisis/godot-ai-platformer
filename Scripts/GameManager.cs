@@ -8,10 +8,13 @@ public partial class GameManager : Node
 	
 	[Signal]
 	public delegate void ResetLevelEventHandler();
-	
-	[Signal]
-	public delegate void PlayerVictoryEventHandler();
-	
+
+    [Signal]
+    public delegate void PlayerVictoryEventHandler();
+
+    [Signal]
+    public delegate void PauseEventHandler(bool isPaused);
+    
 	[Export]
 	public float DeathDelaySeconds = 2.5f;  // Time to wait before resetting after death
 	
@@ -42,9 +45,14 @@ public partial class GameManager : Node
 		GD.Print("[GameManager] Player victory!");
 		EmitSignal(SignalName.PlayerVictory);
 	}
-	
-	public override void _Ready()
-	{
-		GD.Print("[GameManager] Initialized");
-	}
+
+    public override void _Ready()
+    {
+        GD.Print("[GameManager] Initialized");
+    }
+    
+    public void SetPause(bool isPaused)
+    {
+        EmitSignal(SignalName.Pause, isPaused);
+    }
 }

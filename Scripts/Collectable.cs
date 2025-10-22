@@ -12,18 +12,13 @@ public partial class Collectable : Area2D
 	private Timer _respawnTimer;
 	private CollisionShape2D _collision;
 	private bool isPaused;
+	private bool _isRespawning = false;
+	private float _respawnProgress = 0f;
 
 	public override void _Ready()
 	{
 		// Add to Collectable group for physics exclusion
 		AddToGroup("Collectable");
-
-		// Set up respawn timer
-		_respawnTimer = new Timer();
-		_respawnTimer.OneShot = true;
-		_respawnTimer.WaitTime = RespawnTime;
-		_respawnTimer.Timeout += OnRespawnTimerTimeout;
-		AddChild(_respawnTimer);
 
 		// Get collision shape
 		_collision = GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
@@ -32,47 +27,50 @@ public partial class Collectable : Area2D
 		BodyEntered += OnBodyEntered;
 
 		var _gameManager = GetNode<GameManager>("/root/GameManager");
-		_gameManager.ResetLevel += OnResetLevel;
-		_gameManager.PlayerVictory += OnVictory;
-	}
 
-	private void OnResetLevel()
-	{
-		isPaused = false;
-		OnRespawnTimerTimeout();
+		_gameManager.ResetLevel += () =>
+		{
+			isPaused = false;
+			Spawn();
+		};
+		_gameManager.PlayerVictory += () => isPaused = true;
+		_gameManager.Pause += (bool state) => isPaused = state;
 	}
-	
-	private void OnVictory()
-    {
-		isPaused = true;
-    }   
 
 	private void OnBodyEntered(Node2D body)
 	{
 		if (isPaused) return;
 
-		// Check if the entering body is the player
-		if (body.IsInGroup("Player"))
-		{
-			GD.Print($"[Collectable] Collected by player!");
-			
-			// Emit the collected signal
-			EmitSignal(SignalName.Collected);
-			
-			// Hide the collectible and disable collision
-			Visible = false;
-			if (_collision != null) _collision.SetDeferred("disabled", true);
-			
-			// Start respawn timer
-			_respawnTimer.Start();
-		}
+		if (!body.IsInGroup("Player")) return;
+
+		Collect();
+		EmitSignal(SignalName.Collected);
+	}
+
+	public override void _Process(double delta)
+	{
+		if (isPaused) return;
+		if (!_isRespawning) return;
+
+		_respawnProgress += (float)delta;
+		if (_respawnProgress < RespawnTime) return;
+
+		Spawn();
+	}
+
+	private void Spawn()
+	{
+		Visible = true;
+		_isRespawning = false;
+		_collision.SetDeferred("disabled", false);
 	}
 	
-	private void OnRespawnTimerTimeout()
+	private void Collect()
 	{
-		// Show the collectible and enable collision
-		Visible = true;
-		if (_collision != null) _collision.SetDeferred("disabled", false);
-		GD.Print($"[Collectable] Respawned!");
+		Visible = false;
+		_respawnProgress = 0f;
+		_isRespawning = true;
+		_collision.SetDeferred("disabled", false);
+        
 	}
 }

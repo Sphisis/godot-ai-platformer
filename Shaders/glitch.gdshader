@@ -44,9 +44,9 @@ void fragment() {
     
     // Sample original texture for alpha
     vec4 original = texture(TEXTURE, text_uv);
-    float alpha = original.a;
+    float alpha = original.a * COLOR.a;  // Multiply by modulate alpha for fade support
     
-    if (alpha > 0.01) {
+    if (original.a > 0.01) {
         // Block-based displacement
         vec2 block_uv = floor(text_uv * block_size) / block_size;
         float block_noise = random(block_uv + floor(time * 2.0));
