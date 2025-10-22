@@ -7,7 +7,7 @@
 [ext_resource type="TileSet" uid="uid://c0ttxtohxvstb" path="res://Assets/pacmanAtlas.tres" id="5_7rn85"]
 [ext_resource type="Texture2D" uid="uid://ce62h6fu445g0" path="res://Assets/packmanTiles.png" id="6_twqo8"]
 [ext_resource type="Script" uid="uid://cgxunj3tsabgq" path="res://Scripts/Agents/packmanController.cs" id="6_vu02e"]
-[ext_resource type="Script" uid="uid://cusa2f244voho" path="res://Scripts/GhostController.cs" id="8_2je0h"]
+[ext_resource type="Script" uid="uid://cusa2f244voho" path="res://Scripts/Agents/GhostController.cs" id="8_2je0h"]
 [ext_resource type="Script" uid="uid://cb0cam10jyrvn" path="res://Scripts/GlichSprite.cs" id="8_3soxf"]
 [ext_resource type="PackedScene" uid="uid://c7j37iv4gaak5" path="res://Prefabs/jump_scare.tscn" id="8_dxt0h"]
 [ext_resource type="Script" uid="uid://cost67swnmi0m" path="res://Scripts/MazeController.cs" id="8_udlcn"]
@@ -206,7 +206,6 @@ vertical_alignment = 1
 clip_text = true
 uppercase = true
 script = ExtResource("10_okvfx")
-LabelPath = NodePath(".")
 
 [node name="thingsCounter" type="Label" parent="."]
 texture_filter = 1
