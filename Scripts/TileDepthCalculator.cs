@@ -20,6 +20,9 @@ public partial class TileDepthCalculator : TileMapLayer
 	[Export]
 	public Color LightColor = new Color(1, 1, 1);
 	
+	[Export]
+	public Color DarkColor = new Color(0, 0, 0);
+	
 	[Export(PropertyHint.Range, "0.25,1.0,0.25")]
 	public float LightMapResolutionScale = 0.5f;
 	
@@ -59,6 +62,7 @@ public partial class TileDepthCalculator : TileMapLayer
 		_material.SetShaderParameter("ambient_light", AmbientLight);
 		_material.SetShaderParameter("light_intensity", LightIntensity);
 		_material.SetShaderParameter("light_color", LightColor);
+		_material.SetShaderParameter("dark_color", DarkColor);
 	}
 	
 	public override void _Process(double delta)
@@ -216,5 +220,6 @@ public partial class TileDepthCalculator : TileMapLayer
 		_material.SetShaderParameter("ambient_light", AmbientLight);
 		_material.SetShaderParameter("light_intensity", LightIntensity);
 		_material.SetShaderParameter("light_color", LightColor);
+		_material.SetShaderParameter("dark_color", DarkColor);
 	}
 }

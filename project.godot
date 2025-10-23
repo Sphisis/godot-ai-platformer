@@ -13,7 +13,7 @@ config_version=5
 config/name="GodotAiPlatformer"
 run/main_scene="uid://gihhodi8hcae"
 config/features=PackedStringArray("4.5", "C#", "GL Compatibility")
-boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/bg_color=Color(0.14901961, 0.011764706, 0.13725491, 1)
 config/icon="res://Assets/icon.svg"
 
 [autoload]

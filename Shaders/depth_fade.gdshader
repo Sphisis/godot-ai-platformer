@@ -7,6 +7,7 @@ uniform int tile_size = 16;
 uniform float ambient_light : hint_range(0.0, 1.0) = 0.1;
 uniform float light_intensity : hint_range(0.0, 5.0) = 1.0;
 uniform vec3 light_color : source_color = vec3(1.0, 1.0, 1.0);
+uniform vec3 dark_color : source_color = vec3(0.0, 0.0, 0.0);
 uniform float blur_radius : hint_range(0.0, 50.0) = 10.0;
 uniform int blur_quality : hint_range(1, 3) = 2; // 1=fast, 2=balanced, 3=quality
 
@@ -59,6 +60,8 @@ void fragment() {
 	light = max(light, ambient_light);
 	light *= light_intensity;
 	
-	vec3 lit_color = tex.rgb * light * light_color;
+	// Blend between dark_color and light_color based on light value
+	vec3 color_blend = mix(dark_color, light_color, light);
+	vec3 lit_color = tex.rgb * color_blend;
 	COLOR = vec4(lit_color, tex.a);
 }
