@@ -16,7 +16,7 @@
 [ext_resource type="Script" uid="uid://b762gomyvtwdc" path="res://Scripts/TileDepthCalculator.cs" id="14_0yer6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_njov2"]
-size = Vector2(128, 127)
+size = Vector2(79.999985, 98.00002)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_c4vo5"]
 animations = [{
@@ -111,7 +111,8 @@ InputControllerPath = NodePath("../InputController")
 ExplosionScene = ExtResource("6_557d2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
-position = Vector2(0, -0.5)
+position = Vector2(4.5776367e-05, 13.999985)
+scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("RectangleShape2D_njov2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterBody2D"]
