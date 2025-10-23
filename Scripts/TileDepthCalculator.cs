@@ -82,6 +82,12 @@ public partial class TileDepthCalculator : TileMapLayer
 	
 	public override void _Process(double delta)
 	{
+		// Skip processing entirely in editor to avoid performance issues
+		if (Engine.IsEditorHint())
+		{
+			return;
+		}
+		
 		_material.SetShaderParameter("ambient_light", AmbientLight);
 		_material.SetShaderParameter("light_intensity", LightIntensity);
 		_material.SetShaderParameter("light_color", LightColor);
@@ -100,10 +106,6 @@ public partial class TileDepthCalculator : TileMapLayer
 		// Setup material if needed
 		if (_material == null)
 		{
-			if (Engine.IsEditorHint())
-			{
-				GD.Print("[TileDepthCalculator] Setting up material in editor");
-			}
 			SetupMaterial();
 			if (_material == null) return;
 		}
@@ -116,24 +118,12 @@ public partial class TileDepthCalculator : TileMapLayer
 
 		_camera = GetViewport()?.GetCamera2D();
 		
-		// In editor, calculate for entire tilemap if no camera
-		Rect2I cameraRect;
-		if (_camera == null && Engine.IsEditorHint())
-		{
-			cameraRect = GetUsedRect();
-			if (Engine.IsEditorHint() && _lastCameraRect.Size == new Vector2I(0, 0))
-			{
-				GD.Print($"[TileDepthCalculator] Editor mode - calculating for entire tilemap: {cameraRect}");
-			}
-		}
-		else if (_camera == null)
+		if (_camera == null)
 		{
 			return;
 		}
-		else
-		{
-			cameraRect = GetCameraVisibleRect();
-		}
+		
+		Rect2I cameraRect = GetCameraVisibleRect();
 		
 		// Only recalculate if camera moved significantly (at least 1 tile) or first frame
 		bool rectChanged = cameraRect.Position != _lastCameraRect.Position || 
