@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
+[Tool]
 public partial class TileDepthCalculator : TileMapLayer
 {
 	[Export] bool Active;
@@ -34,14 +35,33 @@ public partial class TileDepthCalculator : TileMapLayer
 	private byte[] _lightBytes = BitConverter.GetBytes(1.0f);
 	private byte[] _darkBytes = BitConverter.GetBytes(0.0f);
 
+	public override void _EnterTree()
+	{
+		if (Engine.IsEditorHint())
+		{
+			GD.Print("[TileDepthCalculator] _EnterTree called in editor");
+			SetProcess(true);
+		}
+	}
+
 	public override void _Ready()
 	{
+		GD.Print("[TileDepthCalculator] _Ready called, IsEditor: " + Engine.IsEditorHint());
 		SetProcess(true);
 		SetupMaterial();
 	}
 	
 	private void SetupMaterial()
 	{
+		if (TileSet == null)
+		{
+			if (Engine.IsEditorHint())
+			{
+				GD.Print("[TileDepthCalculator] TileSet not assigned yet");
+			}
+			return;
+		}
+		
 		if (Material is ShaderMaterial shaderMat)
 		{
 			_material = shaderMat;
@@ -58,24 +78,62 @@ public partial class TileDepthCalculator : TileMapLayer
 			_material.Shader = shader;
 			Material = _material;
 		}
-		
-		_material.SetShaderParameter("ambient_light", AmbientLight);
-		_material.SetShaderParameter("light_intensity", LightIntensity);
-		_material.SetShaderParameter("light_color", LightColor);
-		_material.SetShaderParameter("dark_color", DarkColor);
 	}
 	
 	public override void _Process(double delta)
 	{
-		if (!Active) return;
+		_material.SetShaderParameter("ambient_light", AmbientLight);
+		_material.SetShaderParameter("light_intensity", LightIntensity);
+		_material.SetShaderParameter("light_color", LightColor);
+		_material.SetShaderParameter("dark_color", DarkColor);
 
-		_camera = GetViewport()?.GetCamera2D();
-		if (_camera == null)
+		// Handle Active flag - remove material when inactive
+		if (!Active)
 		{
+			if (Material != null)
+			{
+				Material = null;
+			}
 			return;
 		}
 		
-		var cameraRect = GetCameraVisibleRect();
+		// Setup material if needed
+		if (_material == null)
+		{
+			if (Engine.IsEditorHint())
+			{
+				GD.Print("[TileDepthCalculator] Setting up material in editor");
+			}
+			SetupMaterial();
+			if (_material == null) return;
+		}
+		
+		// Ensure material is applied
+		if (Material != _material)
+		{
+			Material = _material;
+		}
+
+		_camera = GetViewport()?.GetCamera2D();
+		
+		// In editor, calculate for entire tilemap if no camera
+		Rect2I cameraRect;
+		if (_camera == null && Engine.IsEditorHint())
+		{
+			cameraRect = GetUsedRect();
+			if (Engine.IsEditorHint() && _lastCameraRect.Size == new Vector2I(0, 0))
+			{
+				GD.Print($"[TileDepthCalculator] Editor mode - calculating for entire tilemap: {cameraRect}");
+			}
+		}
+		else if (_camera == null)
+		{
+			return;
+		}
+		else
+		{
+			cameraRect = GetCameraVisibleRect();
+		}
 		
 		// Only recalculate if camera moved significantly (at least 1 tile) or first frame
 		bool rectChanged = cameraRect.Position != _lastCameraRect.Position || 
@@ -138,6 +196,11 @@ public partial class TileDepthCalculator : TileMapLayer
 	private void CalculateVisibleLightMap(Rect2I bounds)
 	{
 		if (bounds.Size.X <= 0 || bounds.Size.Y <= 0)
+		{
+			return;
+		}
+		
+		if (TileSet == null)
 		{
 			return;
 		}
