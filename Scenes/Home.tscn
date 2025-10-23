@@ -75,6 +75,7 @@ shader_parameter/ambient_light = 0.1
 shader_parameter/light_intensity = 1.0
 shader_parameter/light_color = Color(1, 1, 1, 1)
 shader_parameter/blur_radius = 10.0
+shader_parameter/blur_quality = 2
 
 [node name="Node2D" type="Node2D"]
 metadata/_edit_vertical_guides_ = [-5269.0]
@@ -141,6 +142,7 @@ tile_set = ExtResource("12_67m2w")
 script = ExtResource("14_0yer6")
 Active = true
 BlurRadius = 15
+BlurQuality = 3
 AmbientLight = 0.0
 LightIntensity = 2.0
 LightMapResolutionScale = 0.25

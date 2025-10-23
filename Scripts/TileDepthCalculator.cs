@@ -8,6 +8,9 @@ public partial class TileDepthCalculator : TileMapLayer
 	[Export]
 	public int BlurRadius = 10;
 	
+	[Export(PropertyHint.Range, "1,3,1")]
+	public int BlurQuality = 2; // 1=fast, 2=balanced, 3=quality
+	
 	[Export(PropertyHint.Range, "0.0,1.0")]
 	public float AmbientLight = 0.1f;
 	
@@ -205,6 +208,7 @@ public partial class TileDepthCalculator : TileMapLayer
 		_material.SetShaderParameter("tilemap_size", new Vector2(bounds.Size.X, bounds.Size.Y));
 		_material.SetShaderParameter("tile_size", tileSize);
 		_material.SetShaderParameter("blur_radius", (float)BlurRadius);
+		_material.SetShaderParameter("blur_quality", BlurQuality);
 	}
 
 	private void UpdateMaterialParameters()

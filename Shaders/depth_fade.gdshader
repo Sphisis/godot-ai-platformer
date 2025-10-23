@@ -8,6 +8,7 @@ uniform float ambient_light : hint_range(0.0, 1.0) = 0.1;
 uniform float light_intensity : hint_range(0.0, 5.0) = 1.0;
 uniform vec3 light_color : source_color = vec3(1.0, 1.0, 1.0);
 uniform float blur_radius : hint_range(0.0, 50.0) = 10.0;
+uniform int blur_quality : hint_range(1, 3) = 2; // 1=fast, 2=balanced, 3=quality
 
 varying vec2 world_pos;
 
@@ -22,15 +23,19 @@ float sample_light_blurred(vec2 uv) {
 	}
 	
 	vec2 texel = 1.0 / tex_size;
+	
+	// Adjust step size based on quality: 1=every 3rd pixel, 2=every 2nd, 3=every pixel
+	int step = 4 - blur_quality;
+	int radius = int(blur_radius);
+	
 	float accum = 0.0;
 	float weight_sum = 0.0;
 	float sigma = blur_radius / 3.0;
 	float two_sigma_sq = 2.0 * sigma * sigma;
-	int radius = int(blur_radius);
 	
-	// Separable Gaussian blur approximation (single pass)
-	for (int y = -radius; y <= radius; y++) {
-		for (int x = -radius; x <= radius; x++) {
+	// Optimized blur with variable step size
+	for (int y = -radius; y <= radius; y += step) {
+		for (int x = -radius; x <= radius; x += step) {
 			vec2 offset = vec2(float(x), float(y)) * texel;
 			float dist_sq = float(x * x + y * y);
 			float weight = exp(-dist_sq / two_sigma_sq);
