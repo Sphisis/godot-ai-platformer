@@ -10,7 +10,7 @@ public partial class GameManager : Node
     
 	private float DeathDelaySeconds = 2.5f;  // Time to wait before resetting after death
 	private float VictoryDelaySeconds = 3.0f;  // Time to wait before loading next scene
-	private string NextScenePath = "res://Scenes/Test.tscn";  // Path to the next scene to load after victory
+	private string NextScenePath = "res://Scenes/Home.tscn";  // Path to the next scene to load after victory
 	
 	private bool _isResetting = false;
 
