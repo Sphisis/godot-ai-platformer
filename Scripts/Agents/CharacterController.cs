@@ -149,14 +149,21 @@ public partial class CharacterController : CharacterBody2D
 		{
 			if (!IsOnFloor())
 			{
+				_sprite.SpeedScale = 1f;
 				_sprite.Play("air");
 			}
 			else if (Mathf.Abs(velocity.X) > 10)
 			{
 				_sprite.Play("run");
+				
+				// Scale animation speed based on movement speed (4-12 fps range)
+				float speedRatio = Mathf.Abs(velocity.X) / MaxSpeed; // 0 to 1
+				float animSpeed = Mathf.Lerp(4.0f, 12.0f, speedRatio);
+				_sprite.SpeedScale = animSpeed / (float)_sprite.SpriteFrames.GetAnimationSpeed("run");
 			}
 			else
 			{
+				_sprite.SpeedScale = 1f;
 				_sprite.Play("idle");
 			}
 		}
