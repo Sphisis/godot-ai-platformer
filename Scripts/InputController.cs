@@ -42,6 +42,10 @@ public partial class InputController : Node
 		if (Input.IsKeyPressed(Key.Down) || Input.IsKeyPressed(Key.S))
 			vertical += 1;
 
+		var moveVec = new Vector2(horizontal, vertical);
+		bool isJumpPressed = Input.IsKeyPressed(Key.Space);
+		bool isActionPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
+
 		// Gamepad input (left stick or D-pad)
 		if (Input.GetConnectedJoypads().Count > GamepadDevice)
 		{
@@ -68,10 +72,14 @@ public partial class InputController : Node
 				vertical = -1;
 			if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadDown))
 				vertical = 1;
+
+			isActionPressed = isActionPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
+			isJumpPressed = isJumpPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
+			moveVec = new Vector2(horizontal, vertical);
 		}
 
 		// Emit movement signal (as Vector2)
-		var moveVec = new Vector2(horizontal, vertical);
+
 
 		// Clamp to max magnitude 1 to avoid faster diagonal movement when multiple digital inputs are pressed
 		if (moveVec.Length() > 1f)
@@ -92,14 +100,6 @@ public partial class InputController : Node
 			{
 				hasAnyInput = true;
 			}
-		}
-
-		// Jump input - keyboard (Space) or gamepad (A button)
-		bool isJumpPressed = Input.IsKeyPressed(Key.Space);
-
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isJumpPressed = isJumpPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
 		}
 
 		// Emit jump signals
@@ -123,14 +123,6 @@ public partial class InputController : Node
 		}
 
 		_wasJumpPressed = isJumpPressed;
-
-		// Action input - keyboard (E or X) or gamepad (B button)
-		bool isActionPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
-
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isActionPressed = isActionPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
-		}
 
 		// Emit action signals
 		if (isActionPressed && !_wasActionPressed)
