@@ -3,214 +3,244 @@ using System;
 
 public partial class InputController : Node
 {
-	// Input events
-	// MoveInput now sends a Vector2 (x = horizontal, y = vertical)
+	#region Signals
 	[Signal] public delegate void MoveInputEventHandler(Vector2 direction);
 	[Signal] public delegate void JumpPressedEventHandler();
 	[Signal] public delegate void JumpReleasedEventHandler();
 	[Signal] public delegate void ActionPressedEventHandler();
 	[Signal] public delegate void ActionReleasedEventHandler();
 	[Signal] public delegate void AnyKeyPressedEventHandler();
+	#endregion
 
-	// Gamepad settings
+	#region Export Properties
 	[Export] public int GamepadDevice = 0;
 	[Export] public float DeadZone = 0.2f;
 	[Export] public bool EnableDebugLogging = false;
+	#endregion
 
+	#region Private State
 	private Vector2 _previousMove = Vector2.Zero;
 	private bool _wasJumpPressed;
 	private bool _wasActionPressed;
 	private bool _hadAnyInput = false;
+	#endregion
 
+	#region Public Properties
+	public Vector2 Move => _previousMove;
+	public bool IsJumpPressed => _wasJumpPressed;
+	public bool IsActionPressed => _wasActionPressed;
+	#endregion
+
+	#region Main Processing
 	public override void _Process(double delta)
 	{
 		bool hasAnyInput = false;
 		
-		// Get horizontal and vertical input from keyboard or gamepad
+		// Gather input from all sources
+		var moveVec = GetMovementInput();
+		bool isJumpPressed = GetJumpInput();
+		bool isActionPressed = GetActionInput();
+
+		// Process and emit signals
+		hasAnyInput |= ProcessMovementInput(moveVec);
+		hasAnyInput |= ProcessJumpInput(isJumpPressed);
+		hasAnyInput |= ProcessActionInput(isActionPressed);
+
+		// Emit any key pressed signal
+		if (hasAnyInput)
+		{
+			EmitAnyKeyPressed();
+		}
+	}
+	#endregion
+
+	#region Input Gathering
+	private Vector2 GetMovementInput()
+	{
+		Vector2 movement = GetKeyboardMovement();
+		
+		// Override with gamepad if connected
+		if (HasGamepad())
+		{
+			Vector2 gamepadMovement = GetGamepadMovement();
+			if (gamepadMovement.Length() > 0.01f)
+			{
+				movement = gamepadMovement;
+			}
+		}
+
+		// Normalize to prevent faster diagonal movement
+		return movement.Length() > 1f ? movement.Normalized() : movement;
+	}
+
+	private Vector2 GetKeyboardMovement()
+	{
 		float horizontal = 0;
 		float vertical = 0;
 
-		// Keyboard input
-		if (Input.IsKeyPressed(Key.Left) || Input.IsKeyPressed(Key.A))
-			horizontal -= 1;
-		if (Input.IsKeyPressed(Key.Right) || Input.IsKeyPressed(Key.D))
-			horizontal += 1;
+		if (Input.IsKeyPressed(Key.Left) || Input.IsKeyPressed(Key.A)) horizontal -= 1;
+		if (Input.IsKeyPressed(Key.Right) || Input.IsKeyPressed(Key.D)) horizontal += 1;
+		if (Input.IsKeyPressed(Key.Up) || Input.IsKeyPressed(Key.W)) vertical -= 1;
+		if (Input.IsKeyPressed(Key.Down) || Input.IsKeyPressed(Key.S)) vertical += 1;
 
-		// Vertical keyboard input (Up/Down or W/S)
-		if (Input.IsKeyPressed(Key.Up) || Input.IsKeyPressed(Key.W))
-			vertical -= 1;
-		if (Input.IsKeyPressed(Key.Down) || Input.IsKeyPressed(Key.S))
-			vertical += 1;
+		return new Vector2(horizontal, vertical);
+	}
 
-		var moveVec = new Vector2(horizontal, vertical);
-		bool isJumpPressed = Input.IsKeyPressed(Key.Space);
-		bool isActionPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
+	private Vector2 GetGamepadMovement()
+	{
+		float horizontal = 0;
+		float vertical = 0;
 
-		// Gamepad input (left stick or D-pad)
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
+		// Analog stick input
+		float stickX = Input.GetJoyAxis(GamepadDevice, JoyAxis.LeftX);
+		float stickY = Input.GetJoyAxis(GamepadDevice, JoyAxis.LeftY);
+		
+		if (Mathf.Abs(stickX) > DeadZone) horizontal = stickX;
+		if (Mathf.Abs(stickY) > DeadZone) vertical = stickY;
+
+		// D-pad fallback
+		if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadLeft)) horizontal = -1;
+		if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadRight)) horizontal = 1;
+		if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadUp)) vertical = -1;
+		if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadDown)) vertical = 1;
+
+		return new Vector2(horizontal, vertical);
+	}
+
+	private bool GetJumpInput()
+	{
+		bool isPressed = Input.IsKeyPressed(Key.Space);
+		if (HasGamepad())
 		{
-			float stickX = Input.GetJoyAxis(GamepadDevice, JoyAxis.LeftX);
-			if (Mathf.Abs(stickX) > DeadZone)
-			{
-				horizontal = stickX;
-			}
-
-			// Vertical from left stick Y
-			float stickY = Input.GetJoyAxis(GamepadDevice, JoyAxis.LeftY);
-			if (Mathf.Abs(stickY) > DeadZone)
-			{
-				vertical = stickY;
-			}
-
-			// D-pad fallback (horizontal)
-			if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadLeft))
-				horizontal = -1;
-			if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadRight))
-				horizontal = 1;
-			// D-pad fallback (vertical)
-			if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadUp))
-				vertical = -1;
-			if (Input.IsJoyButtonPressed(GamepadDevice, JoyButton.DpadDown))
-				vertical = 1;
-
-			isActionPressed = isActionPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
-			isJumpPressed = isJumpPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
-			moveVec = new Vector2(horizontal, vertical);
+			isPressed |= Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
 		}
+		return isPressed;
+	}
 
-		// Emit movement signal (as Vector2)
-
-
-		// Clamp to max magnitude 1 to avoid faster diagonal movement when multiple digital inputs are pressed
-		if (moveVec.Length() > 1f)
+	private bool GetActionInput()
+	{
+		bool isPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
+		if (HasGamepad())
 		{
-			moveVec = moveVec.Normalized();
+			isPressed |= Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
 		}
-		if (moveVec != _previousMove)
-		{
-			EmitSignal(SignalName.MoveInput, moveVec);
-			if (EnableDebugLogging)
-			{
-				string source = Input.GetConnectedJoypads().Count > GamepadDevice ? "Gamepad" : "Keyboard";
-				GD.Print($"[InputController] Movement: {moveVec.X:F2}, {moveVec.Y:F2} (Source: {source})");
-			}
-			_previousMove = moveVec;
-			
-			if (moveVec.Length() > 0.01f)
-			{
-				hasAnyInput = true;
-			}
-		}
+		return isPressed;
+	}
 
-		// Emit jump signals
+	private bool HasGamepad()
+	{
+		return Input.GetConnectedJoypads().Count > GamepadDevice;
+	}
+	#endregion
+
+	#region Input Processing
+	private bool ProcessMovementInput(Vector2 moveVec)
+	{
+		if (moveVec == _previousMove) return false;
+
+		EmitSignal(SignalName.MoveInput, moveVec);
+		LogInput($"Movement: {moveVec.X:F2}, {moveVec.Y:F2}");
+		_previousMove = moveVec;
+
+		return moveVec.Length() > 0.01f;
+	}
+
+	private bool ProcessJumpInput(bool isJumpPressed)
+	{
+		bool hasInput = false;
+
 		if (isJumpPressed && !_wasJumpPressed)
 		{
 			EmitSignal(SignalName.JumpPressed);
-			hasAnyInput = true;
-			if (EnableDebugLogging)
-			{
-				string source = Input.GetConnectedJoypads().Count > GamepadDevice && Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A) ? "Gamepad" : "Keyboard";
-				GD.Print($"[InputController] Jump Pressed (Source: {source})");
-			}
+			LogInput("Jump Pressed");
+			hasInput = true;
 		}
 		else if (!isJumpPressed && _wasJumpPressed)
 		{
 			EmitSignal(SignalName.JumpReleased);
-			if (EnableDebugLogging)
-			{
-				GD.Print("[InputController] Jump Released");
-			}
+			LogInput("Jump Released");
 		}
 
 		_wasJumpPressed = isJumpPressed;
+		return hasInput;
+	}
 
-		// Emit action signals
+	private bool ProcessActionInput(bool isActionPressed)
+	{
+		bool hasInput = false;
+
 		if (isActionPressed && !_wasActionPressed)
 		{
 			EmitSignal(SignalName.ActionPressed);
-			hasAnyInput = true;
-			if (EnableDebugLogging)
-			{
-				string source = Input.GetConnectedJoypads().Count > GamepadDevice && Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B) ? "Gamepad" : "Keyboard";
-				GD.Print($"[InputController] Action Pressed (Source: {source})");
-			}
+			LogInput("Action Pressed");
+			hasInput = true;
 		}
 		else if (!isActionPressed && _wasActionPressed)
 		{
 			EmitSignal(SignalName.ActionReleased);
-			if (EnableDebugLogging)
-			{
-				GD.Print("[InputController] Action Released");
-			}
+			LogInput("Action Released");
 		}
 
 		_wasActionPressed = isActionPressed;
+		return hasInput;
+	}
+
+	private void EmitAnyKeyPressed()
+	{
+		EmitSignal(SignalName.AnyKeyPressed);
+		_hadAnyInput = true;
+		LogInput("Any key pressed - first input detected");
+	}
+	#endregion
+
+	#region Public API Methods
+	// Direct polling methods (alternative to signals)
+	public Vector2 GetMoveVector() => _previousMove;
+
+	public bool IsJumpJustPressed
+	{
+		get
+		{
+			bool currentlyPressed = GetJumpInput();
+			return currentlyPressed && !_wasJumpPressed;
+		}
+	}
+
+	public bool IsJumpJustReleased
+	{
+		get
+		{
+			bool currentlyPressed = GetJumpInput();
+			return !currentlyPressed && _wasJumpPressed;
+		}
+	}
+
+	public bool IsActionJustPressed
+	{
+		get
+		{
+			bool currentlyPressed = GetActionInput();
+			return currentlyPressed && !_wasActionPressed;
+		}
+	}
+
+	public bool IsActionJustReleased
+	{
+		get
+		{
+			bool currentlyPressed = GetActionInput();
+			return !currentlyPressed && _wasActionPressed;
+		}
+	}
+	#endregion
+
+	#region Utility Methods
+	private void LogInput(string message)
+	{
+		if (!EnableDebugLogging) return;
 		
-		// Emit AnyKeyPressed signal on first input
-		if (hasAnyInput)
-		{
-			EmitSignal(SignalName.AnyKeyPressed);
-			_hadAnyInput = true;
-			if (EnableDebugLogging)
-			{
-				GD.Print("[InputController] Any key pressed - first input detected");
-			}
-		}
+		string source = HasGamepad() ? "Gamepad" : "Keyboard";
+		GD.Print($"[InputController] {message} (Source: {source})");
 	}
-
-	// Helper methods for direct polling (alternative to signals)
-	public Vector2 GetMoveVector()
-	{
-		return _previousMove;
-	}
-
-	public bool IsJumpPressed()
-	{
-		return _wasJumpPressed;
-	}
-
-	public bool IsJumpJustPressed()
-	{
-		bool isPressed = Input.IsKeyPressed(Key.Space);
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isPressed = isPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
-		}
-		return isPressed && !_wasJumpPressed;
-	}
-
-	public bool IsJumpJustReleased()
-	{
-		bool isPressed = Input.IsKeyPressed(Key.Space);
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isPressed = isPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.A);
-		}
-		return !isPressed && _wasJumpPressed;
-	}
-
-	public bool IsActionPressed()
-	{
-		return _wasActionPressed;
-	}
-
-	public bool IsActionJustPressed()
-	{
-		bool isPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isPressed = isPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
-		}
-		return isPressed && !_wasActionPressed;
-	}
-
-	public bool IsActionJustReleased()
-	{
-		bool isPressed = Input.IsKeyPressed(Key.E) || Input.IsKeyPressed(Key.X);
-		if (Input.GetConnectedJoypads().Count > GamepadDevice)
-		{
-			isPressed = isPressed || Input.IsJoyButtonPressed(GamepadDevice, JoyButton.B);
-		}
-		return !isPressed && _wasActionPressed;
-	}
+	#endregion
 }

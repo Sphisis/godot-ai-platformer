@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=4 uid="uid://37ceayiv2qve"]
+[gd_scene load_steps=57 format=4 uid="uid://37ceayiv2qve"]
 
 [ext_resource type="Script" uid="uid://b3nitrabo1844" path="res://Scripts/CameraFollow.cs" id="1_ph2v2"]
 [ext_resource type="Texture2D" uid="uid://dkp6qma3uxho5" path="res://Assets/sunnysun.png" id="2_i18f2"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bqkny0jri10tl" path="res://Prefabs/explosion.tscn" id="6_pg1b5"]
 [ext_resource type="Texture2D" uid="uid://clrcl4in01dkf" path="res://Assets/charaterAtlas.png" id="7_oamwa"]
 [ext_resource type="Texture2D" uid="uid://cupyv3fxk340n" path="res://Assets/dropShadow.png" id="8_mujo2"]
+[ext_resource type="Script" uid="uid://cncj8p21qgn2o" path="res://Scripts/SceneManager.cs" id="8_rr01w"]
 [ext_resource type="TileSet" uid="uid://c0ttxtohxvstb" path="res://Assets/pacmanAtlas.tres" id="10_uyh5b"]
 [ext_resource type="Texture2D" uid="uid://ttb2obr8l7ey" path="res://Assets/joyAttacks.png" id="11_mujo2"]
 [ext_resource type="Texture2D" uid="uid://lka1302wkfjf" path="res://Assets/firtree.png" id="11_xbiki"]
@@ -18,7 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://dn5boe0w0fr7m" path="res://Assets/happycloud.png" id="12_6tr8g"]
 [ext_resource type="Texture2D" uid="uid://b3bsadbhwco3w" path="res://Assets/joyCombatIdle.png" id="12_rr01w"]
 [ext_resource type="Texture2D" uid="uid://cerqhcqc0kuc8" path="res://Assets/mikkelisign.png" id="13_iqv4d"]
-[ext_resource type="Texture2D" uid="uid://c5r8r4ucjbi45" path="res://Assets/coincollectible.png" id="15_iqv4d"]
+[ext_resource type="PackedScene" uid="uid://cm0rnkdwoxq8p" path="res://Prefabs/coinPickup.tscn" id="20_rr01w"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_njov2"]
 size = Vector2(15.000018, 25.50001)
@@ -182,10 +183,10 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_qmkmh")
 }, {
-"duration": 2.0,
+"duration": 3.0,
 "texture": SubResource("AtlasTexture_3oa57")
 }, {
-"duration": 2.0,
+"duration": 3.0,
 "texture": SubResource("AtlasTexture_0maqj")
 }],
 "loop": false,
@@ -199,10 +200,10 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_r55th")
 }, {
-"duration": 2.0,
+"duration": 3.0,
 "texture": SubResource("AtlasTexture_sjjng")
 }, {
-"duration": 2.0,
+"duration": 3.0,
 "texture": SubResource("AtlasTexture_26iur")
 }],
 "loop": false,
@@ -216,19 +217,19 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_km5ju")
 }, {
-"duration": 1.0,
+"duration": 2.0,
 "texture": SubResource("AtlasTexture_0r81x")
 }, {
-"duration": 1.0,
+"duration": 2.0,
 "texture": SubResource("AtlasTexture_a1wtt")
 }, {
-"duration": 1.0,
+"duration": 2.0,
 "texture": SubResource("AtlasTexture_wt04g")
 }, {
-"duration": 1.0,
+"duration": 2.0,
 "texture": SubResource("AtlasTexture_trxxv")
 }, {
-"duration": 1.0,
+"duration": 2.0,
 "texture": SubResource("AtlasTexture_t8vic")
 }],
 "loop": false,
@@ -339,6 +340,10 @@ texture = ExtResource("6_oamwa")
 [node name="InputController" type="Node2D" parent="."]
 script = ExtResource("4_iqv4d")
 
+[node name="SceneManager" type="Node2D" parent="."]
+position = Vector2(-183, -24)
+script = ExtResource("8_rr01w")
+
 [node name="Joy" type="CharacterBody2D" parent="." groups=["Player"]]
 texture_filter = 1
 position = Vector2(-183, -24)
@@ -353,7 +358,7 @@ MaxFallSpeed = 400.0
 InputControllerPath = NodePath("../InputController")
 ExplosionScene = ExtResource("6_pg1b5")
 ComboWindow = 1.0
-AttackImpulse = 100.0
+AttackImpulse = 80.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Joy"]
 position = Vector2(-0.49998474, -13.25)
@@ -500,38 +505,32 @@ tile_set = ExtResource("10_uyh5b")
 [node name="Collectibles" type="Node2D" parent="."]
 texture_filter = 1
 
-[node name="Coincollectible" type="Sprite2D" parent="Collectibles"]
-position = Vector2(9, -105)
-texture = ExtResource("15_iqv4d")
+[node name="Coin2" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-119, -18)
 
-[node name="Coincollectible2" type="Sprite2D" parent="Collectibles"]
-position = Vector2(34, -105)
-texture = ExtResource("15_iqv4d")
+[node name="Coin3" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-91, -18)
 
-[node name="Coincollectible3" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-106, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin4" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(6, -96)
 
-[node name="Coincollectible4" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-63, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin5" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(38, -96)
 
-[node name="Coincollectible5" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-394, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin6" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(231, -18)
 
-[node name="Coincollectible6" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-480, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin7" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(264, -18)
 
-[node name="Coincollectible7" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-420, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin8" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-416, -18)
 
-[node name="Coincollectible8" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-451, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin9" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-447, -18)
 
-[node name="Coincollectible9" type="Sprite2D" parent="Collectibles"]
-position = Vector2(-451, -26)
-texture = ExtResource("15_iqv4d")
+[node name="Coin10" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-482, -18)
+
+[node name="Coin" parent="Collectibles" instance=ExtResource("20_rr01w")]
+position = Vector2(-147, -18)

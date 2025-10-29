@@ -67,7 +67,7 @@ public partial class CharacterController : CharacterBody2D
 
 		// Core gameplay systems
 		HandleAttack(ref velocity);
-		UpdateAttack(deltaF);
+		UpdateAttack(deltaF, ref velocity);
 		HandleJump(ref velocity, deltaF);
 		HandleGravity(ref velocity, deltaF);
 		HandleHorizontalMovement(ref velocity, deltaF);
@@ -87,7 +87,7 @@ public partial class CharacterController : CharacterBody2D
 	{
 		if (_isAttacking) return;
 
-		if (!_inputController.IsActionJustPressed()) return;
+		if (!_inputController.IsActionJustPressed) return;
 		
 		// reset combo
 		if (_comboTimer <= 0f)
@@ -97,23 +97,28 @@ public partial class CharacterController : CharacterBody2D
 
 		// Play appropriate attack animation
 		_sprite.SpeedScale = 1f;
+		if (!IsOnFloor())_currentComboStep = 2;
 		string attackAnim = $"attack{_currentComboStep}";
 		_sprite.Play(attackAnim);
 
+		// Add velocity impulse to attack direction (like a jump)
+		float attackDirection = _sprite.FlipH ? -1.0f : 1.0f;
+		velocity = new Vector2(attackDirection * AttackImpulse, -80f);
+
 		_isAttacking = true;
 		_comboTimer = ComboWindow;
-
-		// Add velocity impulse to attack direction
-		float attackDirection = _sprite.FlipH ? -1.0f : 1.0f; // Use sprite facing direction
-		velocity.X = attackDirection * AttackImpulse;
 	}
 
-	private void UpdateAttack(float deltaF)
+	private void UpdateAttack(float deltaF, ref Vector2 velocity)
 	{
 		if (_comboTimer > 0f) _comboTimer -= deltaF;
 
 		if (!_isAttacking) return;
-		
+
+		// Add velocity impulse to attack direction
+		float attackDirection = _sprite.FlipH ? -1.0f : 1.0f; // Use sprite facing direction
+		velocity += new Vector2(attackDirection * 200, -200) * deltaF;
+
 		// Check if current attack animation finished
 		if (_sprite.IsPlaying()) return;
 
@@ -137,7 +142,7 @@ public partial class CharacterController : CharacterBody2D
 		}
 
 		// Update jump buffer
-		bool isJumpPressed = _inputController?.IsJumpPressed() ?? false;
+		bool isJumpPressed = _inputController?.IsJumpPressed ?? false;
 		if (isJumpPressed && !_wasJumpPressed)
 		{
 			_jumpBufferCounter = JumpBufferTime;
@@ -172,9 +177,7 @@ public partial class CharacterController : CharacterBody2D
 			velocity.Y += gravityToApply * deltaF;
 			velocity.Y = Mathf.Min(velocity.Y, MaxFallSpeed);
 		}
-	}
-
-	private void HandleHorizontalMovement(ref Vector2 velocity, float deltaF)
+	}	private void HandleHorizontalMovement(ref Vector2 velocity, float deltaF)
 	{
 		float direction = _inputController?.GetMoveVector().X ?? 0;
 
