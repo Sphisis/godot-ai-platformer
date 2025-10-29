@@ -301,6 +301,7 @@ animations = [{
 }]
 
 [node name="Node2D" type="Node2D"]
+position = Vector2(16, 35)
 metadata/_edit_vertical_guides_ = [-5269.0]
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
